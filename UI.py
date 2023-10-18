@@ -65,8 +65,7 @@ class Ui_MainWindow(MainPage, HelloPage, RegisterPage, LoginPage):
 
         self.retranslateUi(MainWindow)
 
-
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(1)
         self.main_tab.setCurrentIndex(0)
         self.items_stackedWidget.setCurrentIndex(0)
         self.sells_tab.setCurrentIndex(0)
