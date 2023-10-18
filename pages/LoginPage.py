@@ -5,6 +5,11 @@ class LoginPage(object):
     def __init__(self):
         self.login_page = QtWidgets.QWidget()
         self.login_page.setObjectName("login_page")
+        self.login_page_back = QtWidgets.QLabel(self.login_page)
+        self.login_page_back.setGeometry(QtCore.QRect(30, 30, 86, 23))
+        self.login_page_back.setText("")
+        self.login_page_back.setPixmap(QtGui.QPixmap("assets/back.png"))
+        self.login_page_back.setObjectName("register_page_2_back")
         self.login_page_frame = QtWidgets.QFrame(self.login_page)
         self.login_page_frame.setGeometry(QtCore.QRect(490, 290, 450, 359))
         self.login_page_frame.setMinimumSize(QtCore.QSize(450, 320))

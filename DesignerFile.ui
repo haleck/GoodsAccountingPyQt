@@ -28,7 +28,7 @@ box-sizing: border-box;</string>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="hello_page">
      <widget class="QWidget" name="verticalLayoutWidget">
@@ -252,7 +252,7 @@ QPushButton:hover {
        <string notr="true">color: rgb(217, 217, 217);</string>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="items">
        <attribute name="title">

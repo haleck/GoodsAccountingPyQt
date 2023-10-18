@@ -65,7 +65,7 @@ class Ui_MainWindow(MainPage, HelloPage, RegisterPage, LoginPage):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget.setCurrentIndex(1)
+        self.stackedWidget.setCurrentIndex(0)
         self.main_tab.setCurrentIndex(0)
         self.items_stackedWidget.setCurrentIndex(0)
         self.sells_tab.setCurrentIndex(0)
@@ -76,6 +76,31 @@ class Ui_MainWindow(MainPage, HelloPage, RegisterPage, LoginPage):
         self.writeOffs_stackedWidget.setCurrentIndex(0)
         self.employees_stackedWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+        # Event listeners
+        self.hello_page_login_label.clicked.connect(self.setLoginPage)          # Кнопка войти на HelloPage
+        self.hello_page_register_label.clicked.connect(self.setRegisterPage1)   # Кнопка ргеистрация на HelloPage
+        self.register_page_1_back.mousePressEvent = self.setHelloPage           # Кнопка назад на RegisterPage1
+        self.register_page_2_back.mousePressEvent = self.setRegisterPage1       # Кнопка назад на RegisterPage2
+        self.login_page_back.mousePressEvent = self.setHelloPage                # Кнопка назад на LoginPage
+        self.register_page_1_btn_btn.clicked.connect(self.setRegisterPage2)     # Кнопка далее на RegisterPage1
+        self.register_page_2_btn.clicked.connect(self.setMainPage)              # Кнопка далее на RegisterPage1
+        self.login_page_btn.clicked.connect(self.setMainPage)                   # Кнопка войт на LoginPage
+
+    def setLoginPage(self, event):
+        self.stackedWidget.setCurrentIndex(4)
+
+    def setRegisterPage1(self, event):
+        self.stackedWidget.setCurrentIndex(3)
+
+    def setRegisterPage2(self, event):
+        self.stackedWidget.setCurrentIndex(2)
+
+    def setHelloPage(self, event):
+        self.stackedWidget.setCurrentIndex(0)
+
+    def setMainPage(self, event):
+        self.stackedWidget.setCurrentIndex(1)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate

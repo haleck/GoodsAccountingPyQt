@@ -665,6 +665,131 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         self.main_tab.addTab(self.employees, "")
 
+        # Event listeners
+
+        # Items
+        self.items_main_add_image.mousePressEvent = self.setItemsCreatePage
+        self.items_create_back_image.mousePressEvent = self.setItemsMainPage
+        self.items_create_saveBtn.clicked.connect(self.itemsCreateSave)
+        self.items_create_closeBtn.clicked.connect(self.itemsCreateClose)
+        self.items_create_delete_image.mousePressEvent = self.itemsCreateDelete
+        # Sells
+        #   Stock
+        self.stock_main_createBtn.mousePressEvent = self.setStockCreatePage
+        self.stock_create_backBtn.mousePressEvent = self.setStockMainPage
+        self.stock_create_saveBtn.clicked.connect(self.stockCreateSave)
+        self.stock_create_closeBtn.clicked.connect(self.stockCreateClose)
+        self.stock_create_deleteImg.mousePressEvent = self.stockCreateDelete
+        #   Orders
+        self.orders_main_createBtn.mousePressEvent = self.setOrdersCreatePage
+        self.orders_create_back_btn.mousePressEvent = self.setOrdersMainPage
+        self.orders_create_closeBtn.clicked.connect(self.ordersCreateClose)
+        self.orders_create_saveBtn.clicked.connect(self.ordersCreateSave)
+        self.orders_create_deleteImg.mousePressEvent = self.ordersCreateDelete
+        #   Returns
+        self.returns_main_createBtn.mousePressEvent = self.setReturnsCreatePage
+        self.returns_create_backBtn.mousePressEvent = self.setReturnsMainPage
+        self.returns_create_delete_img.mousePressEvent = self.returnsCreateDelete
+        self.returns_create_saveBtn.clicked.connect(self.returnsCreateSave)
+        self.returns_create_closeBtn.clicked.connect(self.returnsCreateClose)
+        #   GetStocks
+        self.getStocks_main_createBtn.mousePressEvent = self.setGetStocksCreatePage
+        self.getStocks_create_backBtn.mousePressEvent = self.setGetStocksMainPage
+        self.getStocks_create_delete.mousePressEvent = self.setGetStocksMainPage
+        self.getStocks_create_close.clicked.connect(self.getStocksCreateClose)
+        self.getStocks_create_save.clicked.connect(self.getStocksCreateSave)
+        #   WriteOffs
+        self.writeOffs_main_create.mousePressEvent = self.setWriteOffsCreatePage
+        self.writeOff_create_back.mousePressEvent = self.setWriteOffsMainPage
+        self.writeOff_create_delete.mousePressEvent = self.writeOffsCreateDelete
+        self.pushButton_15.clicked.connect(self.writeOffsCreateSave)
+        self.pushButton_16.clicked.connect(self.writeOffsCreateClose)
+        # Employees
+        self.employees_main_create.mousePressEvent = self.setEmployeesCreatePage
+        self.employees_create_back.mousePressEvent = self.setEmployeesMainPage
+        self.employees_create_delete.mousePressEvent = self.employeesCreateDelete
+        self.employees_create_close.clicked.connect(self.employeesCreateClose)
+        self.employees_create_save.clicked.connect(self.employeesCreateSave)
+
+    # Items
+    def setItemsMainPage(self, event):
+        self.items_stackedWidget.setCurrentIndex(0)
+    def setItemsCreatePage(self, event):
+        self.items_stackedWidget.setCurrentIndex(1)
+    def itemsCreateClose(self):
+        self.items_stackedWidget.setCurrentIndex(0)
+    def itemsCreateSave(self):
+        self.items_stackedWidget.setCurrentIndex(0)
+    def itemsCreateDelete(self, event):
+        self.items_stackedWidget.setCurrentIndex(0)
+
+    # Sells
+    def setStockMainPage(self, event):
+        self.stock_stackedWidget.setCurrentIndex(0)
+    def setStockCreatePage(self, event):
+        self.stock_stackedWidget.setCurrentIndex(1)
+    def stockCreateClose(self):
+        self.stock_stackedWidget.setCurrentIndex(0)
+    def stockCreateSave(self):
+        self.stock_stackedWidget.setCurrentIndex(0)
+    def stockCreateDelete(self, event):
+        self.stock_stackedWidget.setCurrentIndex(0)
+
+    def setOrdersMainPage(self, event):
+        self.orders_stackedWidget.setCurrentIndex(0)
+    def setOrdersCreatePage(self, event):
+        self.orders_stackedWidget.setCurrentIndex(1)
+    def ordersCreateClose(self, event):
+        self.orders_stackedWidget.setCurrentIndex(0)
+    def ordersCreateDelete(self, event):
+        self.orders_stackedWidget.setCurrentIndex(0)
+    def ordersCreateSave(self, event):
+        self.orders_stackedWidget.setCurrentIndex(0)
+
+    def setReturnsMainPage(self, event):
+        self.returns_stackedWidget.setCurrentIndex(0)
+    def setReturnsCreatePage(self, event):
+        self.returns_stackedWidget.setCurrentIndex(1)
+    def returnsCreateClose(self):
+        self.returns_stackedWidget.setCurrentIndex(0)
+    def returnsCreateDelete(self, event):
+        self.returns_stackedWidget.setCurrentIndex(0)
+    def returnsCreateSave(self):
+        self.returns_stackedWidget.setCurrentIndex(0)
+
+    def setGetStocksMainPage(self, event):
+        self.getStocks_stackedWidget.setCurrentIndex(0)
+    def setGetStocksCreatePage(self, event):
+        self.getStocks_stackedWidget.setCurrentIndex(1)
+    def getStocksCreateClose(self):
+        self.getStocks_stackedWidget.setCurrentIndex(0)
+    def getStocksCreateDelete(self):
+        self.getStocks_stackedWidget.setCurrentIndex(0)
+    def getStocksCreateSave(self):
+        self.getStocks_stackedWidget.setCurrentIndex(0)
+
+    def setWriteOffsMainPage(self, event):
+        self.writeOffs_stackedWidget.setCurrentIndex(0)
+    def setWriteOffsCreatePage(self, event):
+        self.writeOffs_stackedWidget.setCurrentIndex(1)
+    def writeOffsCreateClose(self, event):
+        self.writeOffs_stackedWidget.setCurrentIndex(0)
+    def writeOffsCreateDelete(self, event):
+        self.writeOffs_stackedWidget.setCurrentIndex(0)
+    def writeOffsCreateSave(self, event):
+        self.writeOffs_stackedWidget.setCurrentIndex(0)
+
+    def setEmployeesMainPage(self, event):
+        self.employees_stackedWidget.setCurrentIndex(0)
+    def setEmployeesCreatePage(self, event):
+        self.employees_stackedWidget.setCurrentIndex(1)
+    def employeesCreateClose(self, event):
+        self.employees_stackedWidget.setCurrentIndex(0)
+    def employeesCreateDelete(self, event):
+        self.employees_stackedWidget.setCurrentIndex(0)
+    def employeesCreateSave(self, event):
+        self.employees_stackedWidget.setCurrentIndex(0)
+
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
 
