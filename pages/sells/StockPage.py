@@ -10,11 +10,23 @@ class StockPage(object):
         self.stock_stackedWidget.setObjectName("stock_stackedWidget")
         self.stock_main = QtWidgets.QWidget()
         self.stock_main.setObjectName("stock_main")
+
+        # Start of Stock Table
+
         self.stock_main_table = QtWidgets.QTableWidget(self.stock_main)
         self.stock_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
         self.stock_main_table.setRowCount(0)
         self.stock_main_table.setObjectName("stock_main_table")
         self.stock_main_table.setColumnCount(7)
+
+        self.stock_main_table.setColumnWidth(0, 150)
+        self.stock_main_table.setColumnWidth(1, 250)
+        self.stock_main_table.setColumnWidth(2, 250)
+        self.stock_main_table.setColumnWidth(3, 175)
+        self.stock_main_table.setColumnWidth(4, 158)
+        self.stock_main_table.setColumnWidth(5, 158)
+        self.stock_main_table.setColumnWidth(6, 157)
+
         item = QtWidgets.QTableWidgetItem()
         self.stock_main_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -29,6 +41,9 @@ class StockPage(object):
         self.stock_main_table.setHorizontalHeaderItem(5, item)
         item = QtWidgets.QTableWidgetItem()
         self.stock_main_table.setHorizontalHeaderItem(6, item)
+
+        # End of Stock Table
+
         self.stock_main_createBtn = QtWidgets.QLabel(self.stock_main)
         self.stock_main_createBtn.setGeometry(QtCore.QRect(1100, 50, 262, 20))
         self.stock_main_createBtn.setText("")

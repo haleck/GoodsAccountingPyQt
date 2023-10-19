@@ -10,11 +10,20 @@ class OrdersPage(object):
         self.orders_stackedWidget.setObjectName("orders_stackedWidget")
         self.orders_main = QtWidgets.QWidget()
         self.orders_main.setObjectName("orders_main")
+
+        # Start of Orders Table
+
         self.orders_main_table = QtWidgets.QTableWidget(self.orders_main)
         self.orders_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
         self.orders_main_table.setObjectName("orders_main_table")
         self.orders_main_table.setColumnCount(4)
         self.orders_main_table.setRowCount(0)
+
+        self.orders_main_table.setColumnWidth(0, 325)
+        self.orders_main_table.setColumnWidth(1, 325)
+        self.orders_main_table.setColumnWidth(2, 324)
+        self.orders_main_table.setColumnWidth(3, 324)
+
         item = QtWidgets.QTableWidgetItem()
         self.orders_main_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -23,6 +32,9 @@ class OrdersPage(object):
         self.orders_main_table.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.orders_main_table.setHorizontalHeaderItem(3, item)
+
+        # End of Orders Table
+
         self.orders_main_createBtn = QtWidgets.QLabel(self.orders_main)
         self.orders_main_createBtn.setGeometry(QtCore.QRect(1230, 50, 131, 20))
         self.orders_main_createBtn.setText("")

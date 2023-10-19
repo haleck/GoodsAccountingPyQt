@@ -10,11 +10,21 @@ class WriteOffsPage(object):
         self.writeOffs_stackedWidget.setObjectName("writeOffs_stackedWidget")
         self.writeOffs_main = QtWidgets.QWidget()
         self.writeOffs_main.setObjectName("writeOffs_main")
+
+        # Start of WriteOffs Table
+
         self.writeOffs_main_table = QtWidgets.QTableWidget(self.writeOffs_main)
         self.writeOffs_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
         self.writeOffs_main_table.setObjectName("writeOffs_main_table")
         self.writeOffs_main_table.setColumnCount(5)
         self.writeOffs_main_table.setRowCount(0)
+
+        self.writeOffs_main_table.setColumnWidth(0, 260)
+        self.writeOffs_main_table.setColumnWidth(1, 260)
+        self.writeOffs_main_table.setColumnWidth(2, 260)
+        self.writeOffs_main_table.setColumnWidth(3, 259)
+        self.writeOffs_main_table.setColumnWidth(4, 259)
+
         item = QtWidgets.QTableWidgetItem()
         self.writeOffs_main_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -25,6 +35,9 @@ class WriteOffsPage(object):
         self.writeOffs_main_table.setHorizontalHeaderItem(3, item)
         item = QtWidgets.QTableWidgetItem()
         self.writeOffs_main_table.setHorizontalHeaderItem(4, item)
+
+        # End of WriteOffs Table
+
         self.writeOffs_main_search = QtWidgets.QLineEdit(self.writeOffs_main)
         self.writeOffs_main_search.setGeometry(QtCore.QRect(60, 40, 401, 35))
         font = QtGui.QFont()

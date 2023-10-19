@@ -252,7 +252,7 @@ QPushButton:hover {
        <string notr="true">color: rgb(217, 217, 217);</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="items">
        <attribute name="title">
@@ -1673,7 +1673,7 @@ QPushButton:hover {
            </rect>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="orders_main">
            <widget class="QTableWidget" name="orders_main_table">
@@ -3102,7 +3102,7 @@ QPushButton:hover {
            </rect>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="getStocks_main">
            <widget class="QTableWidget" name="getStocks_main_table">
@@ -3709,7 +3709,7 @@ QPushButton:hover {
            </rect>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="writeOffs_main">
            <widget class="QTableWidget" name="writeOffs_main_table">
@@ -4362,7 +4362,7 @@ background-color: rgb(52, 52, 52);</string>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="employees_main">
          <widget class="QTableWidget" name="employees_main_table">

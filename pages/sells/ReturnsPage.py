@@ -10,11 +10,20 @@ class ReturnsPage(object):
         self.returns_stackedWidget.setObjectName("returns_stackedWidget")
         self.returns_main = QtWidgets.QWidget()
         self.returns_main.setObjectName("returns_main")
+
+        # Start of Returns Table
+
         self.returns_main_table = QtWidgets.QTableWidget(self.returns_main)
         self.returns_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
         self.returns_main_table.setObjectName("returns_main_table")
         self.returns_main_table.setColumnCount(4)
         self.returns_main_table.setRowCount(0)
+
+        self.returns_main_table.setColumnWidth(0, 325)
+        self.returns_main_table.setColumnWidth(1, 325)
+        self.returns_main_table.setColumnWidth(2, 324)
+        self.returns_main_table.setColumnWidth(3, 324)
+
         item = QtWidgets.QTableWidgetItem()
         self.returns_main_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -23,6 +32,9 @@ class ReturnsPage(object):
         self.returns_main_table.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.returns_main_table.setHorizontalHeaderItem(3, item)
+
+        # End of Returns Table
+
         self.returns_main_search_img = QtWidgets.QLabel(self.returns_main)
         self.returns_main_search_img.setGeometry(QtCore.QRect(430, 50, 18, 18))
         self.returns_main_search_img.setStyleSheet("background: none")

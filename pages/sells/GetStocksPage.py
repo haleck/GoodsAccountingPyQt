@@ -10,17 +10,28 @@ class GetStocksPage(object):
         self.getStocks_stackedWidget.setObjectName("getStocks_stackedWidget")
         self.getStocks_main = QtWidgets.QWidget()
         self.getStocks_main.setObjectName("getStocks_main")
+
+        # Start of GetStocks Table
+
         self.getStocks_main_table = QtWidgets.QTableWidget(self.getStocks_main)
         self.getStocks_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
         self.getStocks_main_table.setObjectName("getStocks_main_table")
         self.getStocks_main_table.setColumnCount(3)
         self.getStocks_main_table.setRowCount(0)
+
+        self.getStocks_main_table.setColumnWidth(0, 433)
+        self.getStocks_main_table.setColumnWidth(1, 432)
+        self.getStocks_main_table.setColumnWidth(2, 433)
+
         item = QtWidgets.QTableWidgetItem()
         self.getStocks_main_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
         self.getStocks_main_table.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.getStocks_main_table.setHorizontalHeaderItem(2, item)
+
+        # End of GetStocks Table
+
         self.getStocks_main_createBtn = QtWidgets.QLabel(self.getStocks_main)
         self.getStocks_main_createBtn.setGeometry(QtCore.QRect(1150, 50, 208, 20))
         self.getStocks_main_createBtn.setText("")

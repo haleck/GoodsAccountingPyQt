@@ -60,12 +60,24 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
                                                       "background-color: rgb(52, 52, 52);")
         self.items_main_search_lineEdit.setText("")
         self.items_main_search_lineEdit.setObjectName("items_main_search_lineEdit")
+
+        # Start of Items Table
+
         self.items_main_table = QtWidgets.QTableWidget(self.items_main)
         self.items_main_table.setGeometry(QtCore.QRect(70, 150, 1300, 700))
         self.items_main_table.setAlternatingRowColors(False)
         self.items_main_table.setColumnCount(7)
         self.items_main_table.setObjectName("items_main_table")
         self.items_main_table.setRowCount(0)
+
+        self.items_main_table.setColumnWidth(0, 150)
+        self.items_main_table.setColumnWidth(1, 300)
+        self.items_main_table.setColumnWidth(2, 150)
+        self.items_main_table.setColumnWidth(3, 150)
+        self.items_main_table.setColumnWidth(4, 250)
+        self.items_main_table.setColumnWidth(5, 149)
+        self.items_main_table.setColumnWidth(6, 149)
+
         item = QtWidgets.QTableWidgetItem()
         self.items_main_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -80,6 +92,9 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_main_table.setHorizontalHeaderItem(5, item)
         item = QtWidgets.QTableWidgetItem()
         self.items_main_table.setHorizontalHeaderItem(6, item)
+
+        # End of Items Table
+
         self.items_main_add_image = QtWidgets.QLabel(self.items_main)
         self.items_main_add_image.setGeometry(QtCore.QRect(1210, 80, 158, 20))
         self.items_main_add_image.setText("")
@@ -329,11 +344,20 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.watch_search_img.setText("")
         self.watch_search_img.setPixmap(QtGui.QPixmap("assets/search.png"))
         self.watch_search_img.setObjectName("watch_search_img")
+
+        # Start of watch table
+
         self.watch_table = QtWidgets.QTableWidget(self.watch)
         self.watch_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
         self.watch_table.setObjectName("watch_table")
         self.watch_table.setColumnCount(4)
         self.watch_table.setRowCount(0)
+
+        self.watch_table.setColumnWidth(0, 325)
+        self.watch_table.setColumnWidth(1, 325)
+        self.watch_table.setColumnWidth(2, 324)
+        self.watch_table.setColumnWidth(3, 324)
+
         item = QtWidgets.QTableWidgetItem()
         self.watch_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -343,6 +367,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         item = QtWidgets.QTableWidgetItem()
         self.watch_table.setHorizontalHeaderItem(3, item)
 
+        # End of watch table
         # End of watch
 
         self.main_tab.addTab(self.watch, "")
@@ -356,11 +381,22 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_stackedWidget.setObjectName("employees_stackedWidget")
         self.employees_main = QtWidgets.QWidget()
         self.employees_main.setObjectName("employees_main")
+
+        # Start of Employees Table
+
         self.employees_main_table = QtWidgets.QTableWidget(self.employees_main)
         self.employees_main_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
         self.employees_main_table.setObjectName("employees_main_table")
         self.employees_main_table.setColumnCount(6)
         self.employees_main_table.setRowCount(0)
+
+        self.employees_main_table.setColumnWidth(0, 216)
+        self.employees_main_table.setColumnWidth(1, 217)
+        self.employees_main_table.setColumnWidth(2, 216)
+        self.employees_main_table.setColumnWidth(3, 217)
+        self.employees_main_table.setColumnWidth(4, 216)
+        self.employees_main_table.setColumnWidth(5, 216)
+
         item = QtWidgets.QTableWidgetItem()
         self.employees_main_table.setHorizontalHeaderItem(0, item)
         item = QtWidgets.QTableWidgetItem()
@@ -373,6 +409,9 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_main_table.setHorizontalHeaderItem(4, item)
         item = QtWidgets.QTableWidgetItem()
         self.employees_main_table.setHorizontalHeaderItem(5, item)
+
+        # End of Employees Table
+
         self.employees_main_search_lineEdit = QtWidgets.QLineEdit(self.employees_main)
         self.employees_main_search_lineEdit.setGeometry(QtCore.QRect(60, 70, 401, 35))
         font = QtGui.QFont()
@@ -809,7 +848,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         item = self.items_main_table.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "Категория"))
         item = self.items_main_table.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Новый столбец"))
+        item.setText(_translate("MainWindow", "Описание"))
         item = self.items_main_table.horizontalHeaderItem(5)
         item.setText(_translate("MainWindow", "Ед. изм."))
         item = self.items_main_table.horizontalHeaderItem(6)
