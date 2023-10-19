@@ -1,7 +1,16 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTableWidgetItem
 
 class WriteOffsPage(object):
+    def fetchWriteOffs(self):
+        return [
+            {'id': 1, 'date': '23.06.2023', 'itemName': 'Молоко', 'amount': '2 Шт', 'cause': 'Нарушена упаковки'},
+            {'id': 2, 'date': '23.06.2023', 'itemName': 'Кефир', 'amount': '2 Шт', 'cause': 'Срок годности'},
+            {'id': 3, 'date': '24.06.2023', 'itemName': 'Сгущенка', 'amount': '2 Шт', 'cause': 'Срок годности'},
+            {'id': 4, 'date': '25.06.2023', 'itemName': 'Сыр', 'amount': '2 Шт', 'cause': 'Нарушена упаковки'},
+            {'id': 5, 'date': '25.06.2023', 'itemName': 'Торт', 'amount': '2 Шт', 'cause': 'Срок годности'},
+        ]
     def __init__(self):
         self.writeOffs = QtWidgets.QWidget()
         self.writeOffs.setObjectName("writeOffs")
@@ -12,6 +21,8 @@ class WriteOffsPage(object):
         self.writeOffs_main.setObjectName("writeOffs_main")
 
         # Start of WriteOffs Table
+
+        data = self.fetchWriteOffs()
 
         self.writeOffs_main_table = QtWidgets.QTableWidget(self.writeOffs_main)
         self.writeOffs_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
@@ -35,6 +46,41 @@ class WriteOffsPage(object):
         self.writeOffs_main_table.setHorizontalHeaderItem(3, item)
         item = QtWidgets.QTableWidgetItem()
         self.writeOffs_main_table.setHorizontalHeaderItem(4, item)
+
+        self.writeOffs_main_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.writeOffs_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['date'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.writeOffs_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['itemName'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.writeOffs_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['amount'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.writeOffs_main_table.setItem(row, 3, cell)
+
+            cell = QTableWidgetItem(item['cause'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.writeOffs_main_table.setItem(row, 4, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.writeOffs_main_table.columnCount()):
+                self.writeOffs_main_table.item(row, col).setSelected(True)
+
+        self.writeOffs_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.writeOffs_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # End of WriteOffs Table
 

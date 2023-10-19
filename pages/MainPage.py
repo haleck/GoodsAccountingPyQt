@@ -1,4 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTableWidgetItem
 
 from pages.sells.StockPage import StockPage
 from pages.sells.OrdersPage import OrdersPage
@@ -7,12 +9,47 @@ from pages.sells.GetStocksPage import GetStocksPage
 from pages.sells.WriteOffsPage import WriteOffsPage
 
 class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage):
+    def fetchItems(self):
+        return [
+            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
+            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
+            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
+            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
+            {'id': 5, 'name': 'Название товара 5', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 5', 'manufacturer': 'Производитель 2', 'amount': 1},
+            {'id': 6, 'name': 'Название товара 6', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 6', 'manufacturer': 'Производитель 3', 'amount': 5},
+            {'id': 7, 'name': 'Название товара 7', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 7', 'manufacturer': 'Производитель 3', 'amount': 1},
+            {'id': 8, 'name': 'Название товара 8', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 8', 'manufacturer': 'Производитель 4', 'amount': 10},
+            {'id': 9, 'name': 'Название товара 9', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 9', 'manufacturer': 'Производитель 5', 'amount': 8},
+        ]
+
+    def fetchActions(self):
+        return [
+            {'id': 1, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 16:30'},
+            {'id': 2, 'action': 'Удаление товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 18:40'},
+            {'id': 3, 'action': 'Проведение инвентаризации', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 19:10'},
+            {'id': 4, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '24.06.2023 10:00'},
+            {'id': 5, 'action': 'Создание оприходования', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '24.06.2023 12:12'},
+            {'id': 6, 'action': 'Удаление товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 09:30'},
+            {'id': 7, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 16:30'},
+            {'id': 8, 'action': 'Редактирование товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 16:35'},
+            {'id': 9, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '26.06.2023 19:00'},
+        ]
+
+    def fetchEmployees(self):
+        return [
+            {'id': 1, 'surname': 'Haleckiy', 'name': 'Denis', 'patronymic': 'Aleksandrovich', 'role': 'Admin', 'number':'+79994006577'},
+            {'id': 2, 'surname': 'Petronv', 'name': 'Anton', 'patronymic': 'Urievich', 'role': 'Worker', 'number':'+79294506577'},
+            {'id': 3, 'surname': 'Ivanov', 'name': 'Semen', 'patronymic': 'Ivanovich', 'role': 'Worker', 'number':'+79794006554'},
+            {'id': 4, 'surname': 'Sidorov', 'name': 'Vladislav', 'patronymic': 'Vladimirovich', 'role': 'Worker', 'number':'+79934006577'},
+            {'id': 5, 'surname': 'Malcev', 'name': 'Roman', 'patronymic': 'Vladislavovich', 'role': 'Admin', 'number':'+79594916577'},
+        ]
     def __init__(self):
         StockPage.__init__(self)
         OrdersPage.__init__(self)
         ReturnsPage.__init__(self)
         GetStocksPage.__init__(self)
         WriteOffsPage.__init__(self)
+
 
 
         self.main_page = QtWidgets.QWidget()
@@ -63,6 +100,8 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # Start of Items Table
 
+        data = self.fetchItems()
+
         self.items_main_table = QtWidgets.QTableWidget(self.items_main)
         self.items_main_table.setGeometry(QtCore.QRect(70, 150, 1300, 700))
         self.items_main_table.setAlternatingRowColors(False)
@@ -78,20 +117,53 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_main_table.setColumnWidth(5, 149)
         self.items_main_table.setColumnWidth(6, 149)
 
-        item = QtWidgets.QTableWidgetItem()
-        self.items_main_table.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.items_main_table.setHorizontalHeaderItem(1, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.items_main_table.setHorizontalHeaderItem(2, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.items_main_table.setHorizontalHeaderItem(3, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.items_main_table.setHorizontalHeaderItem(4, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.items_main_table.setHorizontalHeaderItem(5, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.items_main_table.setHorizontalHeaderItem(6, item)
+        # Создание заголовков столбцов
+        for j in range(7):
+            item = QtWidgets.QTableWidgetItem()
+            self.items_main_table.setHorizontalHeaderItem(j, item)
+
+        self.items_main_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['name'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['manufacturer'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['category'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 3, cell)
+
+            cell = QTableWidgetItem(item['description'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 4, cell)
+
+            cell = QTableWidgetItem(item['unit'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 5, cell)
+
+            cell = QTableWidgetItem(str(item['price']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 6, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.items_main_table.columnCount()):
+                self.items_main_table.item(row, col).setSelected(True)
+
+        self.items_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.items_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # End of Items Table
 
@@ -347,6 +419,8 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # Start of watch table
 
+        data = self.fetchActions()
+
         self.watch_table = QtWidgets.QTableWidget(self.watch)
         self.watch_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
         self.watch_table.setObjectName("watch_table")
@@ -367,6 +441,37 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         item = QtWidgets.QTableWidgetItem()
         self.watch_table.setHorizontalHeaderItem(3, item)
 
+        self.watch_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['action'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['employee'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['date'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 3, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.watch_table.columnCount()):
+                self.watch_table.item(row, col).setSelected(True)
+
+        self.watch_table.itemClicked.connect(on_item_click)
+
+        #
+        self.watch_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         # End of watch table
         # End of watch
 
@@ -383,6 +488,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_main.setObjectName("employees_main")
 
         # Start of Employees Table
+        data = self.fetchEmployees()
 
         self.employees_main_table = QtWidgets.QTableWidget(self.employees_main)
         self.employees_main_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
@@ -409,6 +515,45 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_main_table.setHorizontalHeaderItem(4, item)
         item = QtWidgets.QTableWidgetItem()
         self.employees_main_table.setHorizontalHeaderItem(5, item)
+
+        self.employees_main_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['surname'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['name'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['patronymic'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 3, cell)
+
+            cell = QTableWidgetItem(item['role'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 4, cell)
+
+            cell = QTableWidgetItem(item['number'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 5, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.employees_main_table.columnCount()):
+                self.employees_main_table.item(row, col).setSelected(True)
+
+        self.employees_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.employees_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # End of Employees Table
 

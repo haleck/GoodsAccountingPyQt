@@ -1,7 +1,30 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTableWidgetItem
 
 
 class StockPage(object):
+    def fetchStock(self):
+        return [
+            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1, 'reserved': 1},
+            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2, 'reserved': 1},
+            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1, 'reserved': 1},
+            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3, 'reserved': 2},
+            {'id': 5, 'name': 'Название товара 5', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 5', 'manufacturer': 'Производитель 2', 'amount': 1, 'reserved': 1},
+            {'id': 6, 'name': 'Название товара 6', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 6', 'manufacturer': 'Производитель 3', 'amount': 5, 'reserved': 3},
+            {'id': 7, 'name': 'Название товара 7', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 7', 'manufacturer': 'Производитель 3', 'amount': 1, 'reserved': 1},
+            {'id': 8, 'name': 'Название товара 8', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 8', 'manufacturer': 'Производитель 4', 'amount': 10, 'reserved': 7},
+            {'id': 9, 'name': 'Название товара 9', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
+             'description': 'Описание товара 9', 'manufacturer': 'Производитель 5', 'amount': 8, 'reserved': 2},
+        ]
     def __init__(self):
         self.stock = QtWidgets.QWidget()
         self.stock.setObjectName("stock")
@@ -12,6 +35,8 @@ class StockPage(object):
         self.stock_main.setObjectName("stock_main")
 
         # Start of Stock Table
+
+        data = self.fetchStock()
 
         self.stock_main_table = QtWidgets.QTableWidget(self.stock_main)
         self.stock_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
@@ -42,6 +67,48 @@ class StockPage(object):
         item = QtWidgets.QTableWidgetItem()
         self.stock_main_table.setHorizontalHeaderItem(6, item)
 
+        self.stock_main_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.stock_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['name'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.stock_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['manufacturer'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.stock_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['category'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.stock_main_table.setItem(row, 3, cell)
+
+            cell = QTableWidgetItem(str(item['price']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.stock_main_table.setItem(row, 4, cell)
+
+            cell = QTableWidgetItem(str(item['amount']) + ' ' + item['unit'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.stock_main_table.setItem(row, 5, cell)
+
+            cell = QTableWidgetItem(str(item['reserved']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.stock_main_table.setItem(row, 6, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.stock_main_table.columnCount()):
+                self.stock_main_table.item(row, col).setSelected(True)
+
+        self.stock_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.stock_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         # End of Stock Table
 
         self.stock_main_createBtn = QtWidgets.QLabel(self.stock_main)

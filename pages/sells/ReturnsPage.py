@@ -1,7 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTableWidgetItem
 
 
 class ReturnsPage(object):
+    def fetchReturns(self):
+        return [
+            {'id': 1, 'orderId': 32, 'cause': 'Нарушена упаковка', 'date': '12.04.2023'},
+            {'id': 2, 'orderId': 16, 'cause': 'Бракованный товар', 'date': '15.04.2023'},
+            {'id': 3, 'orderId': 72, 'cause': 'Не полный комплект', 'date': '22.04.2023'},
+            {'id': 4, 'orderId': 25, 'cause': 'Нарушена упаковка', 'date': '27.04.2023'},
+            {'id': 5, 'orderId': 89, 'cause': 'Не полный комплект', 'date': '02.05.2023'},
+        ]
     def __init__(self):
         self.returns = QtWidgets.QWidget()
         self.returns.setObjectName("returns")
@@ -12,6 +22,8 @@ class ReturnsPage(object):
         self.returns_main.setObjectName("returns_main")
 
         # Start of Returns Table
+
+        data = self.fetchReturns()
 
         self.returns_main_table = QtWidgets.QTableWidget(self.returns_main)
         self.returns_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
@@ -32,6 +44,37 @@ class ReturnsPage(object):
         self.returns_main_table.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.returns_main_table.setHorizontalHeaderItem(3, item)
+
+        self.returns_main_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.returns_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(str(item['orderId']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.returns_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['cause'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.returns_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['date'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.returns_main_table.setItem(row, 3, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.returns_main_table.columnCount()):
+                self.returns_main_table.item(row, col).setSelected(True)
+
+        self.returns_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.returns_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # End of Returns Table
 
@@ -263,9 +306,9 @@ class ReturnsPage(object):
         item = self.returns_main_table.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Код возврата"))
         item = self.returns_main_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Новый столбец"))
-        item = self.returns_main_table.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "Код заказа"))
+        item = self.returns_main_table.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "Причина"))
         item = self.returns_main_table.horizontalHeaderItem(3)
         item.setText(_translate("MainWindow", "Дата и время"))
         self.returns_main_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))

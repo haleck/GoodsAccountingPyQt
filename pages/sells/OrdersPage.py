@@ -1,7 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTableWidgetItem
 
 class OrdersPage(object):
+    def fetchOrders(self):
+        return [
+            {'id': 1, 'status': 'created', 'address': 'a long long address line 4 ex. 12322', 'date': '24.09.2023'},
+            {'id': 2, 'status': 'created', 'address': 'a long long address line 4 ex. 12322', 'date': '25.09.2023'},
+            {'id': 3, 'status': 'in process', 'address': 'a long long address line 4 ex. 12322', 'date': '24.11.2023'},
+            {'id': 4, 'status': 'done', 'address': 'a long long address line 4 ex. 12322', 'date': '25.11.2023'},
+            {'id': 5, 'status': 'created', 'address': 'a long long address line 4 ex. 12322', 'date': '26.11.2023'},
+            {'id': 6, 'status': 'in process', 'address': 'a long long address line 4 ex. 12322', 'date': '29.11.2023'},
+        ]
     def __init__(self):
         self.orders = QtWidgets.QWidget()
         self.orders.setObjectName("orders")
@@ -12,6 +22,8 @@ class OrdersPage(object):
         self.orders_main.setObjectName("orders_main")
 
         # Start of Orders Table
+
+        data = self.fetchOrders()
 
         self.orders_main_table = QtWidgets.QTableWidget(self.orders_main)
         self.orders_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
@@ -32,6 +44,37 @@ class OrdersPage(object):
         self.orders_main_table.setHorizontalHeaderItem(2, item)
         item = QtWidgets.QTableWidgetItem()
         self.orders_main_table.setHorizontalHeaderItem(3, item)
+
+        self.orders_main_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.orders_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['status'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.orders_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['address'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.orders_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['date'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.orders_main_table.setItem(row, 3, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.orders_main_table.columnCount()):
+                self.orders_main_table.item(row, col).setSelected(True)
+
+        self.orders_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.orders_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # End of Orders Table
 

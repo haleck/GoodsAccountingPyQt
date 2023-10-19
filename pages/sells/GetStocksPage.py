@@ -1,7 +1,17 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QTableWidgetItem
 
 class GetStocksPage(object):
+    def fetchGetStocks(self):
+        return [
+            {'id': 1, 'date': '23.06.2023', 'time': '20:10'},
+            {'id': 2, 'date': '23.06.2023', 'time': '20:15'},
+            {'id': 3, 'date': '24.06.2023', 'time': '15:40'},
+            {'id': 4, 'date': '24.06.2023', 'time': '16:30'},
+            {'id': 5, 'date': '24.06.2023', 'time': '16:40'},
+        ]
     def __init__(self):
         self.getStocks = QtWidgets.QWidget()
         self.getStocks.setObjectName("getStocks")
@@ -12,6 +22,8 @@ class GetStocksPage(object):
         self.getStocks_main.setObjectName("getStocks_main")
 
         # Start of GetStocks Table
+
+        data = self.fetchGetStocks()
 
         self.getStocks_main_table = QtWidgets.QTableWidget(self.getStocks_main)
         self.getStocks_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
@@ -29,6 +41,33 @@ class GetStocksPage(object):
         self.getStocks_main_table.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.getStocks_main_table.setHorizontalHeaderItem(2, item)
+
+        self.getStocks_main_table.setRowCount(len(data))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(data):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.getStocks_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['date'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.getStocks_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['time'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.getStocks_main_table.setItem(row, 2, cell)
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            for col in range(self.getStocks_main_table.columnCount()):
+                self.getStocks_main_table.item(row, col).setSelected(True)
+
+        self.getStocks_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.getStocks_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # End of GetStocks Table
 
