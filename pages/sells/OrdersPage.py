@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTableWidgetItem, QWidget
+from PyQt5.QtCore import Qt, QStringListModel
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtWidgets import QTableWidgetItem, QWidget, QCompleter
 
 from utils import *
 
@@ -128,6 +129,8 @@ class OrdersPage(object):
 
         self.orders_create_newItem_ok.setText("OK")
         self.orders_create_newItem_name.setPlaceholderText("Введите название...")
+
+        addItemCompleters(self.orders_create_newItem_name)
 
     def clearOrdersInCreationPage(self):
         for child in self.orders_create_scrollAreaWidgetContents.findChildren(QWidget):

@@ -130,6 +130,8 @@ class GetStocksPage(object):
         self.getStocks_create_new_name.setPlaceholderText("Введите название товара...")
         self.getStocks_create_new_ok.setText("OK")
 
+        addItemCompleters(self.getStocks_create_new_name)
+
     def clearGetStocksInCreationPage(self):
         for child in self.getStocks_create_scrollAreaWidgetContents.findChildren(QWidget):
             child.deleteLater()

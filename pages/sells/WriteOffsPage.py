@@ -271,6 +271,8 @@ class WriteOffsPage(object):
         self.pushButton_16.setObjectName("pushButton_16")
         self.writeOffs_stackedWidget.addWidget(self.writeOff_create)
 
+        addItemCompleters(self.writeOff_create_item_lineEdit)
+
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
 
