@@ -2,15 +2,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QTableWidgetItem
 
+from utils import *
+
 class WriteOffsPage(object):
-    def fetchWriteOffs(self):
-        return [
-            {'id': 1, 'date': '23.06.2023', 'itemName': 'Молоко', 'amount': '2 Шт', 'cause': 'Нарушена упаковки'},
-            {'id': 2, 'date': '23.06.2023', 'itemName': 'Кефир', 'amount': '2 Шт', 'cause': 'Срок годности'},
-            {'id': 3, 'date': '24.06.2023', 'itemName': 'Сгущенка', 'amount': '2 Шт', 'cause': 'Срок годности'},
-            {'id': 4, 'date': '25.06.2023', 'itemName': 'Сыр', 'amount': '2 Шт', 'cause': 'Нарушена упаковки'},
-            {'id': 5, 'date': '25.06.2023', 'itemName': 'Торт', 'amount': '2 Шт', 'cause': 'Срок годности'},
-        ]
     def __init__(self):
         self.writeOffs = QtWidgets.QWidget()
         self.writeOffs.setObjectName("writeOffs")
@@ -22,7 +16,7 @@ class WriteOffsPage(object):
 
         # Start of WriteOffs Table
 
-        data = self.fetchWriteOffs()
+        self.writeOffsData = fetchWriteOffs()
 
         self.writeOffs_main_table = QtWidgets.QTableWidget(self.writeOffs_main)
         self.writeOffs_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
@@ -47,10 +41,10 @@ class WriteOffsPage(object):
         item = QtWidgets.QTableWidgetItem()
         self.writeOffs_main_table.setHorizontalHeaderItem(4, item)
 
-        self.writeOffs_main_table.setRowCount(len(data))
+        self.writeOffs_main_table.setRowCount(len(self.writeOffsData))
 
         # Заполнение таблицы данными
-        for row, item in enumerate(data):
+        for row, item in enumerate(self.writeOffsData):
             cell = QTableWidgetItem(str(item['id']))
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.writeOffs_main_table.setItem(row, 0, cell)
@@ -71,9 +65,12 @@ class WriteOffsPage(object):
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.writeOffs_main_table.setItem(row, 4, cell)
 
+        self.writeOffsCurrentRow = None
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
+            self.writeOffsCurrentRow = row
+
             for col in range(self.writeOffs_main_table.columnCount()):
                 self.writeOffs_main_table.item(row, col).setSelected(True)
 

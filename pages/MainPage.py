@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtWidgets import QTableWidgetItem, QWidget
 
 from pages.sells.StockPage import StockPage
 from pages.sells.OrdersPage import OrdersPage
@@ -8,41 +8,9 @@ from pages.sells.ReturnsPage import ReturnsPage
 from pages.sells.GetStocksPage import GetStocksPage
 from pages.sells.WriteOffsPage import WriteOffsPage
 
+from utils import *
+
 class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage):
-    def fetchItems(self):
-        return [
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-            {'id': 5, 'name': 'Название товара 5', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 5', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 6, 'name': 'Название товара 6', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 6', 'manufacturer': 'Производитель 3', 'amount': 5},
-            {'id': 7, 'name': 'Название товара 7', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 7', 'manufacturer': 'Производитель 3', 'amount': 1},
-            {'id': 8, 'name': 'Название товара 8', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 8', 'manufacturer': 'Производитель 4', 'amount': 10},
-            {'id': 9, 'name': 'Название товара 9', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123, 'description': 'Описание товара 9', 'manufacturer': 'Производитель 5', 'amount': 8},
-        ]
-
-    def fetchActions(self):
-        return [
-            {'id': 1, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 16:30'},
-            {'id': 2, 'action': 'Удаление товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 18:40'},
-            {'id': 3, 'action': 'Проведение инвентаризации', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 19:10'},
-            {'id': 4, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '24.06.2023 10:00'},
-            {'id': 5, 'action': 'Создание оприходования', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '24.06.2023 12:12'},
-            {'id': 6, 'action': 'Удаление товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 09:30'},
-            {'id': 7, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 16:30'},
-            {'id': 8, 'action': 'Редактирование товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 16:35'},
-            {'id': 9, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '26.06.2023 19:00'},
-        ]
-
-    def fetchEmployees(self):
-        return [
-            {'id': 1, 'surname': 'Haleckiy', 'name': 'Denis', 'patronymic': 'Aleksandrovich', 'role': 'Admin', 'number':'+79994006577'},
-            {'id': 2, 'surname': 'Petronv', 'name': 'Anton', 'patronymic': 'Urievich', 'role': 'Worker', 'number':'+79294506577'},
-            {'id': 3, 'surname': 'Ivanov', 'name': 'Semen', 'patronymic': 'Ivanovich', 'role': 'Worker', 'number':'+79794006554'},
-            {'id': 4, 'surname': 'Sidorov', 'name': 'Vladislav', 'patronymic': 'Vladimirovich', 'role': 'Worker', 'number':'+79934006577'},
-            {'id': 5, 'surname': 'Malcev', 'name': 'Roman', 'patronymic': 'Vladislavovich', 'role': 'Admin', 'number':'+79594916577'},
-        ]
     def __init__(self):
         StockPage.__init__(self)
         OrdersPage.__init__(self)
@@ -100,7 +68,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # Start of Items Table
 
-        data = self.fetchItems()
+        self.itemsData = fetchItems()
 
         self.items_main_table = QtWidgets.QTableWidget(self.items_main)
         self.items_main_table.setGeometry(QtCore.QRect(70, 150, 1300, 700))
@@ -122,10 +90,10 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
             item = QtWidgets.QTableWidgetItem()
             self.items_main_table.setHorizontalHeaderItem(j, item)
 
-        self.items_main_table.setRowCount(len(data))
+        self.items_main_table.setRowCount(len(self.itemsData))
 
         # Заполнение таблицы данными
-        for row, item in enumerate(data):
+        for row, item in enumerate(self.itemsData):
             cell = QTableWidgetItem(str(item['id']))
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.items_main_table.setItem(row, 0, cell)
@@ -154,9 +122,12 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.items_main_table.setItem(row, 6, cell)
 
+        self.itemsCurrentRow = None
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
+            self.itemsCurrentRow = row
+
             for col in range(self.items_main_table.columnCount()):
                 self.items_main_table.item(row, col).setSelected(True)
 
@@ -295,6 +266,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
                                                           "border-color: rgb(66, 66, 66);\n"
                                                           "border-radius: 8px;")
         self.items_create_category_comboBox.setObjectName("items_create_category_comboBox")
+        self.items_create_category_comboBox.addItems(fetchCategories())
         self.items_create_manufact_widget = QtWidgets.QWidget(self.items_create)
         self.items_create_manufact_widget.setGeometry(QtCore.QRect(530, 650, 431, 80))
         self.items_create_manufact_widget.setObjectName("items_create_manufact_widget")
@@ -312,6 +284,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
                                                           "border-color: rgb(66, 66, 66);\n"
                                                           "border-radius: 8px;")
         self.items_create_manufact_comboBox.setObjectName("items_create_manufact_comboBox")
+        self.items_create_manufact_comboBox.addItems(fetchManufacturers())
         self.items_create_edIzm_widget = QtWidgets.QWidget(self.items_create)
         self.items_create_edIzm_widget.setGeometry(QtCore.QRect(990, 650, 161, 80))
         self.items_create_edIzm_widget.setObjectName("items_create_edIzm_widget")
@@ -330,6 +303,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
                                                        "border-radius: 8px;")
         self.items_create_edizm_ComboBox.setObjectName("items_create_edizm_ComboBox")
         self.items_create_edizm_ComboBox.addItem("")
+        self.items_create_edizm_ComboBox.addItems(fetchUnits())
         self.items_create_price_widget = QtWidgets.QWidget(self.items_create)
         self.items_create_price_widget.setGeometry(QtCore.QRect(1170, 630, 201, 101))
         self.items_create_price_widget.setMinimumSize(QtCore.QSize(0, 101))
@@ -419,7 +393,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # Start of watch table
 
-        data = self.fetchActions()
+        self.watchData = fetchActions()
 
         self.watch_table = QtWidgets.QTableWidget(self.watch)
         self.watch_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
@@ -441,10 +415,10 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         item = QtWidgets.QTableWidgetItem()
         self.watch_table.setHorizontalHeaderItem(3, item)
 
-        self.watch_table.setRowCount(len(data))
+        self.watch_table.setRowCount(len(self.watchData))
 
         # Заполнение таблицы данными
-        for row, item in enumerate(data):
+        for row, item in enumerate(self.watchData):
             cell = QTableWidgetItem(str(item['id']))
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.watch_table.setItem(row, 0, cell)
@@ -461,9 +435,12 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.watch_table.setItem(row, 3, cell)
 
+        self.watchCurrentRow = None
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
+            self.watchCurrentRow = row
+
             for col in range(self.watch_table.columnCount()):
                 self.watch_table.item(row, col).setSelected(True)
 
@@ -488,7 +465,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_main.setObjectName("employees_main")
 
         # Start of Employees Table
-        data = self.fetchEmployees()
+        self.employeesData = fetchEmployees()
 
         self.employees_main_table = QtWidgets.QTableWidget(self.employees_main)
         self.employees_main_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
@@ -516,10 +493,10 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         item = QtWidgets.QTableWidgetItem()
         self.employees_main_table.setHorizontalHeaderItem(5, item)
 
-        self.employees_main_table.setRowCount(len(data))
+        self.employees_main_table.setRowCount(len(self.employeesData))
 
         # Заполнение таблицы данными
-        for row, item in enumerate(data):
+        for row, item in enumerate(self.employeesData):
             cell = QTableWidgetItem(str(item['id']))
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.employees_main_table.setItem(row, 0, cell)
@@ -544,9 +521,12 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.employees_main_table.setItem(row, 5, cell)
 
+        self.employeesCurrentRow = None
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
+            self.employeesCurrentRow = row
+
             for col in range(self.employees_main_table.columnCount()):
                 self.employees_main_table.item(row, col).setSelected(True)
 
@@ -742,7 +722,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
                                                           "border-radius: 8px;")
         self.employees_create_role_combobox.setObjectName("employees_create_role_combobox")
         self.employees_create_role_combobox.addItem("")
-        self.employees_create_role_combobox.addItem("")
+        self.employees_create_role_combobox.addItems(fetchRoles())
         self.employees_create_number = QtWidgets.QWidget(self.employees_create)
         self.employees_create_number.setGeometry(QtCore.QRect(710, 400, 655, 81))
         self.employees_create_number.setMinimumSize(QtCore.QSize(0, 0))
@@ -857,6 +837,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_create_saveBtn.clicked.connect(self.itemsCreateSave)
         self.items_create_closeBtn.clicked.connect(self.itemsCreateClose)
         self.items_create_delete_image.mousePressEvent = self.itemsCreateDelete
+        self.items_main_table.itemDoubleClicked.connect(self.setUpItemsCreatePage)
         # Sells
         #   Stock
         self.stock_main_createBtn.mousePressEvent = self.setStockCreatePage
@@ -870,31 +851,35 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.orders_create_closeBtn.clicked.connect(self.ordersCreateClose)
         self.orders_create_saveBtn.clicked.connect(self.ordersCreateSave)
         self.orders_create_deleteImg.mousePressEvent = self.ordersCreateDelete
+        self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
         #   Returns
         self.returns_main_createBtn.mousePressEvent = self.setReturnsCreatePage
         self.returns_create_backBtn.mousePressEvent = self.setReturnsMainPage
         self.returns_create_delete_img.mousePressEvent = self.returnsCreateDelete
         self.returns_create_saveBtn.clicked.connect(self.returnsCreateSave)
         self.returns_create_closeBtn.clicked.connect(self.returnsCreateClose)
+        self.returns_main_table.itemDoubleClicked.connect(self.setUpReturnsPage)
         #   GetStocks
         self.getStocks_main_createBtn.mousePressEvent = self.setGetStocksCreatePage
         self.getStocks_create_backBtn.mousePressEvent = self.setGetStocksMainPage
         self.getStocks_create_delete.mousePressEvent = self.setGetStocksMainPage
         self.getStocks_create_close.clicked.connect(self.getStocksCreateClose)
         self.getStocks_create_save.clicked.connect(self.getStocksCreateSave)
+        self.getStocks_main_table.itemDoubleClicked.connect(self.setUpGetStocksCreatePage)
         #   WriteOffs
         self.writeOffs_main_create.mousePressEvent = self.setWriteOffsCreatePage
         self.writeOff_create_back.mousePressEvent = self.setWriteOffsMainPage
         self.writeOff_create_delete.mousePressEvent = self.writeOffsCreateDelete
         self.pushButton_15.clicked.connect(self.writeOffsCreateSave)
         self.pushButton_16.clicked.connect(self.writeOffsCreateClose)
+        self.writeOffs_main_table.itemDoubleClicked.connect(self.setUpWrireOffsCreatePage)
         # Employees
         self.employees_main_create.mousePressEvent = self.setEmployeesCreatePage
         self.employees_create_back.mousePressEvent = self.setEmployeesMainPage
         self.employees_create_delete.mousePressEvent = self.employeesCreateDelete
         self.employees_create_close.clicked.connect(self.employeesCreateClose)
         self.employees_create_save.clicked.connect(self.employeesCreateSave)
-
+        self.employees_main_table.itemDoubleClicked.connect(self.setUpEmployeesCreatePage)
     # Items
     def setItemsMainPage(self, event):
         self.items_stackedWidget.setCurrentIndex(0)
@@ -906,6 +891,15 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_stackedWidget.setCurrentIndex(0)
     def itemsCreateDelete(self, event):
         self.items_stackedWidget.setCurrentIndex(0)
+    def setUpItemsCreatePage(self):
+        row = self.itemsData[self.itemsCurrentRow]
+        self.items_create_fieldItem_lineEdit.setText(row['name'])
+        self.items_create_descr_textEdit.setText(row['description'])
+        self.items_create_category_comboBox.setCurrentText(row['category'])
+        self.items_create_manufact_comboBox.setCurrentText(row['manufacturer'])
+        self.items_create_edizm_ComboBox.setCurrentText(row['unit'])
+        self.items_create_price_lineEdit.setText(str(row['price']))
+        self.items_stackedWidget.setCurrentIndex(1)
 
     # Sells
     def setStockMainPage(self, event):
@@ -922,6 +916,16 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     def setOrdersMainPage(self, event):
         self.orders_stackedWidget.setCurrentIndex(0)
     def setOrdersCreatePage(self, event):
+        self.ordersCurrentRow = None
+        self.orders_create_header.setText('Создание заказа')
+        self.orders_create_login_lineEdit.setText('')
+        self.orders_create_status_combobox.setCurrentText('Создан')
+        self.clearOrdersInCreationPage()
+        self.showOrdersList([])
+        self.showNewItemCreationInOrderPage()
+        self.orders_create_table_manufac.setText('')
+        self.orders_create_table_insys.setText('')
+        self.orders_create_inorder.setText('')
         self.orders_stackedWidget.setCurrentIndex(1)
     def ordersCreateClose(self, event):
         self.orders_stackedWidget.setCurrentIndex(0)
@@ -929,10 +933,33 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.orders_stackedWidget.setCurrentIndex(0)
     def ordersCreateSave(self, event):
         self.orders_stackedWidget.setCurrentIndex(0)
+    def setUpOrdersCreatePage(self):
+        self.clearOrdersInCreationPage()
+        row = self.ordersData[self.ordersCurrentRow]
+        self.orders_create_header.setText('Заказ ' + str(row['id']))
+        self.orders_create_login_lineEdit.setText(row['address'])
+        self.orders_create_status_combobox.setCurrentText(row['status'])
+        self.showOrdersList(row['items'])
+        self.showNewItemCreationInOrderPage()
+        self.orders_stackedWidget.setCurrentIndex(1)
 
     def setReturnsMainPage(self, event):
         self.returns_stackedWidget.setCurrentIndex(0)
     def setReturnsCreatePage(self, event):
+        self.returns_create_order_lineEdit.setEnabled(True)
+        self.returnsCurrentRow = None
+        self.clearReturnsCreatePage()
+        self.returns_create_item = QtWidgets.QLabel(self.returns_create)
+        self.returns_create_item.setGeometry(QtCore.QRect(60, 230, 670, 17))
+
+        self.returns_create_order_lineEdit.setText('')
+        self.returns_create_cause_comboBox.setCurrentText('Не выбрано')
+        self.returns_create_header.setText('Создание возврата')
+        self.returns_create_item.setObjectName("returns_create_item")
+        self.returns_create_item.setText("Для оформления возврата сперва найдите нужный заказ")
+        self.returns_create_manufac.setText("")
+        self.returns_create_inorder.setText("")
+        self.returns_create_return.setText("")
         self.returns_stackedWidget.setCurrentIndex(1)
     def returnsCreateClose(self):
         self.returns_stackedWidget.setCurrentIndex(0)
@@ -940,10 +967,20 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.returns_stackedWidget.setCurrentIndex(0)
     def returnsCreateSave(self):
         self.returns_stackedWidget.setCurrentIndex(0)
+    def setUpReturnsPage(self):
+        self.returns_create_order_lineEdit.setEnabled(False)
+        self.clearReturnsCreatePage()
+        self.showListOfReturns(self.returnsData[self.returnsCurrentRow])
+        self.returns_stackedWidget.setCurrentIndex(1)
 
     def setGetStocksMainPage(self, event):
         self.getStocks_stackedWidget.setCurrentIndex(0)
     def setGetStocksCreatePage(self, event):
+        self.getStocksCurrentRow = None
+        self.clearGetStocksInCreationPage()
+        self.showListOfGetStocks([])
+        self.showItemCreationInGetStocksPage()
+        self.getStocks_create_header.setText('Новое оприходвание')
         self.getStocks_stackedWidget.setCurrentIndex(1)
     def getStocksCreateClose(self):
         self.getStocks_stackedWidget.setCurrentIndex(0)
@@ -951,10 +988,22 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.getStocks_stackedWidget.setCurrentIndex(0)
     def getStocksCreateSave(self):
         self.getStocks_stackedWidget.setCurrentIndex(0)
+    def setUpGetStocksCreatePage(self):
+        self.clearGetStocksInCreationPage()
+        self.showListOfGetStocks(self.getStocksData[self.getStocksCurrentRow]['items'])
+        self.showItemCreationInGetStocksPage()
+        self.getStocks_create_header.setText('Оприходование ' + str(self.getStocksData[self.getStocksCurrentRow]['id']))
+        self.getStocks_stackedWidget.setCurrentIndex(1)
 
     def setWriteOffsMainPage(self, event):
         self.writeOffs_stackedWidget.setCurrentIndex(0)
     def setWriteOffsCreatePage(self, event):
+        self.writeOffsCurrentRow = None
+        self.page_header_6.setText('Новое списание')
+        self.writeOff_create_cause_lineEdit.setText('')
+        self.writeOff_create_item_lineEdit.setText('')
+        self.writeOff_create_manufac_lineEdit.setText('')
+        self.writeOff_create_amount_spinbox.setValue(0)
         self.writeOffs_stackedWidget.setCurrentIndex(1)
     def writeOffsCreateClose(self, event):
         self.writeOffs_stackedWidget.setCurrentIndex(0)
@@ -962,10 +1011,30 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.writeOffs_stackedWidget.setCurrentIndex(0)
     def writeOffsCreateSave(self, event):
         self.writeOffs_stackedWidget.setCurrentIndex(0)
+    def setUpWrireOffsCreatePage(self):
+        currentElement = self.writeOffsData[self.writeOffsCurrentRow]
+        self.page_header_6.setText('Списание ' + str(currentElement['id']))
+        self.writeOff_create_cause_lineEdit.setText(currentElement['cause'])
+        self.writeOff_create_item_lineEdit.setText(currentElement['itemName'])
+        self.writeOff_create_manufac_lineEdit.setText(currentElement['manufacturer'])
+        self.writeOff_create_amount_spinbox.setValue(currentElement['amount'])
+        self.writeOffs_stackedWidget.setCurrentIndex(1)
 
     def setEmployeesMainPage(self, event):
         self.employees_stackedWidget.setCurrentIndex(0)
     def setEmployeesCreatePage(self, event):
+        self.itemsCurrentRow = None
+        self.employeesCurrentRow = None
+        self.employees_create_surname_lineEdit.setText('')
+        self.employees_create_name_lineEdit.setText('')
+        self.employees_create_patronymic_lineedit.setText('')
+        self.employees_create_role_combobox.setCurrentText('')
+        self.employees_create_number_lineedit.setText('')
+        self.employees_create_user_lineedit.setText('')
+        self.employees_create_password_lineedit.setText('')
+        self.employees_create_sex_male.setChecked(False)
+        self.employees_create_sex_female.setChecked(False)
+        self.employees_create_header.setText("Добавление сотрудника")
         self.employees_stackedWidget.setCurrentIndex(1)
     def employeesCreateClose(self, event):
         self.employees_stackedWidget.setCurrentIndex(0)
@@ -973,6 +1042,19 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_stackedWidget.setCurrentIndex(0)
     def employeesCreateSave(self, event):
         self.employees_stackedWidget.setCurrentIndex(0)
+    def setUpEmployeesCreatePage(self):
+        row = self.employeesData[self.employeesCurrentRow]
+        self.employees_create_surname_lineEdit.setText(row['surname'])
+        self.employees_create_name_lineEdit.setText(row['name'])
+        self.employees_create_patronymic_lineedit.setText(row['patronymic'])
+        self.employees_create_role_combobox.setCurrentText(row['role'])
+        self.employees_create_number_lineedit.setText(row['number'])
+        self.employees_create_user_lineedit.setText(row['username'])
+        self.employees_create_password_lineedit.setText(row['password'])
+        self.employees_create_sex_male.setChecked(row['sex'] == 'male')
+        self.employees_create_sex_female.setChecked(row['sex'] == 'female')
+        self.employees_create_header.setText('Сотрудник ' + str(row['id']))
+        self.employees_stackedWidget.setCurrentIndex(1)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
@@ -1048,7 +1130,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         item = self.employees_main_table.horizontalHeaderItem(5)
         item.setText(_translate("MainWindow", "Номер"))
         self.employees_main_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
-        self.employees_create_header.setText(_translate("MainWindow", "Сотрудник 123123"))
+        self.employees_create_header.setText(_translate("MainWindow", "Добавление сотрудника"))
         self.employees_create_save.setText(_translate("MainWindow", "СОХРАНИТЬ"))
         self.employees_create_close.setText(_translate("MainWindow", "ЗАКРЫТЬ"))
         self.employees_create_surname_header.setText(_translate("MainWindow", "Фамилия"))

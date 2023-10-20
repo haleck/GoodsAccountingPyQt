@@ -2,29 +2,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QTableWidgetItem
 
+from utils import *
 
 class StockPage(object):
-    def fetchStock(self):
-        return [
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1, 'reserved': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2, 'reserved': 1},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1, 'reserved': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3, 'reserved': 2},
-            {'id': 5, 'name': 'Название товара 5', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 5', 'manufacturer': 'Производитель 2', 'amount': 1, 'reserved': 1},
-            {'id': 6, 'name': 'Название товара 6', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 6', 'manufacturer': 'Производитель 3', 'amount': 5, 'reserved': 3},
-            {'id': 7, 'name': 'Название товара 7', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 7', 'manufacturer': 'Производитель 3', 'amount': 1, 'reserved': 1},
-            {'id': 8, 'name': 'Название товара 8', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 8', 'manufacturer': 'Производитель 4', 'amount': 10, 'reserved': 7},
-            {'id': 9, 'name': 'Название товара 9', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 9', 'manufacturer': 'Производитель 5', 'amount': 8, 'reserved': 2},
-        ]
     def __init__(self):
         self.stock = QtWidgets.QWidget()
         self.stock.setObjectName("stock")
@@ -36,7 +16,7 @@ class StockPage(object):
 
         # Start of Stock Table
 
-        data = self.fetchStock()
+        self.stockData = fetchStock()
 
         self.stock_main_table = QtWidgets.QTableWidget(self.stock_main)
         self.stock_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
@@ -44,13 +24,13 @@ class StockPage(object):
         self.stock_main_table.setObjectName("stock_main_table")
         self.stock_main_table.setColumnCount(7)
 
-        self.stock_main_table.setColumnWidth(0, 150)
-        self.stock_main_table.setColumnWidth(1, 250)
-        self.stock_main_table.setColumnWidth(2, 250)
-        self.stock_main_table.setColumnWidth(3, 175)
-        self.stock_main_table.setColumnWidth(4, 158)
-        self.stock_main_table.setColumnWidth(5, 158)
-        self.stock_main_table.setColumnWidth(6, 157)
+        self.stock_main_table.setColumnWidth(0, 120)
+        self.stock_main_table.setColumnWidth(1, 235)
+        self.stock_main_table.setColumnWidth(2, 235)
+        self.stock_main_table.setColumnWidth(3, 195)
+        self.stock_main_table.setColumnWidth(4, 118)
+        self.stock_main_table.setColumnWidth(5, 198)
+        self.stock_main_table.setColumnWidth(6, 192)
 
         item = QtWidgets.QTableWidgetItem()
         self.stock_main_table.setHorizontalHeaderItem(0, item)
@@ -67,10 +47,10 @@ class StockPage(object):
         item = QtWidgets.QTableWidgetItem()
         self.stock_main_table.setHorizontalHeaderItem(6, item)
 
-        self.stock_main_table.setRowCount(len(data))
+        self.stock_main_table.setRowCount(len(self.stockData))
 
         # Заполнение таблицы данными
-        for row, item in enumerate(data):
+        for row, item in enumerate(self.stockData):
             cell = QTableWidgetItem(str(item['id']))
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.stock_main_table.setItem(row, 0, cell)
@@ -99,9 +79,12 @@ class StockPage(object):
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.stock_main_table.setItem(row, 6, cell)
 
+        self.stockCurrentRow = None
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
+            self.stockCurrentRow = row
+
             for col in range(self.stock_main_table.columnCount()):
                 self.stock_main_table.item(row, col).setSelected(True)
 
@@ -175,91 +158,104 @@ class StockPage(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.stock_create_scrollAreaWidgetContents.sizePolicy().hasHeightForWidth())
         self.stock_create_scrollAreaWidgetContents.setSizePolicy(sizePolicy)
-        self.stock_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, 800))
+        self.stock_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, 40*len(self.stockData)))
         self.stock_create_scrollAreaWidgetContents.setObjectName("stock_create_scrollAreaWidgetContents")
-        self.stock_create_table_item1 = QtWidgets.QWidget(self.stock_create_scrollAreaWidgetContents)
-        self.stock_create_table_item1.setGeometry(QtCore.QRect(0, 0, 1300, 35))
-        self.stock_create_table_item1.setMinimumSize(QtCore.QSize(0, 0))
-        self.stock_create_table_item1.setObjectName("stock_create_table_item1")
-        self.stock_create_table_checkbox = QtWidgets.QCheckBox(self.stock_create_table_item1)
-        self.stock_create_table_checkbox.setGeometry(QtCore.QRect(0, 0, 35, 35))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.stock_create_table_checkbox.sizePolicy().hasHeightForWidth())
-        self.stock_create_table_checkbox.setSizePolicy(sizePolicy)
-        self.stock_create_table_checkbox.setMinimumSize(QtCore.QSize(0, 0))
-        self.stock_create_table_checkbox.setStyleSheet("QCheckBox::indicator { \n"
-                                                       "    width: 35px; \n"
-                                                       "    height: 35px;\n"
-                                                       "}\n"
-                                                       "QCheckBox {\n"
-                                                       "    background-color: rgb(91, 91, 91);\n"
-                                                       "    border-color: rgb(66, 66, 66);\n"
-                                                       "    border-radius: 6px;\n"
-                                                       "}")
-        self.stock_create_table_checkbox.setText("")
-        self.stock_create_table_checkbox.setIconSize(QtCore.QSize(40, 40))
-        self.stock_create_table_checkbox.setChecked(False)
-        self.stock_create_table_checkbox.setObjectName("stock_create_table_checkbox")
-        self.stock_create_table_name_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
-        self.stock_create_table_name_lineEdit.setEnabled(False)
-        self.stock_create_table_name_lineEdit.setGeometry(QtCore.QRect(40, 0, 580, 35))
-        self.stock_create_table_name_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.stock_create_table_name_lineEdit.setFont(font)
-        self.stock_create_table_name_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                            "border-color: rgb(66, 66, 66);\n"
-                                                            "background-color:rgb(71, 71, 71);\n"
-                                                            "border-radius: 8px;\n"
-                                                            "padding: 5px;")
-        self.stock_create_table_name_lineEdit.setText("")
-        self.stock_create_table_name_lineEdit.setObjectName("stock_create_table_name_lineEdit")
-        self.stock_create_table_manufac_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
-        self.stock_create_table_manufac_lineEdit.setEnabled(False)
-        self.stock_create_table_manufac_lineEdit.setGeometry(QtCore.QRect(630, 0, 275, 35))
-        self.stock_create_table_manufac_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.stock_create_table_manufac_lineEdit.setFont(font)
-        self.stock_create_table_manufac_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                               "border-color: rgb(66, 66, 66);\n"
-                                                               "background-color: rgb(71, 71, 71);\n"
-                                                               "border-radius: 8px;\n"
-                                                               "padding: 5px;")
-        self.stock_create_table_manufac_lineEdit.setText("")
-        self.stock_create_table_manufac_lineEdit.setObjectName("stock_create_table_manufac_lineEdit")
-        self.stock_create_table_item1_insys = QtWidgets.QLineEdit(self.stock_create_table_item1)
-        self.stock_create_table_item1_insys.setEnabled(False)
-        self.stock_create_table_item1_insys.setGeometry(QtCore.QRect(920, 0, 110, 35))
-        self.stock_create_table_item1_insys.setMinimumSize(QtCore.QSize(0, 35))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.stock_create_table_item1_insys.setFont(font)
-        self.stock_create_table_item1_insys.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                          "border-color: rgb(66, 66, 66);\n"
-                                                          "background-color: rgb(71, 71, 71);\n"
-                                                          "border-radius: 8px;\n"
-                                                          "padding: 5px;")
-        self.stock_create_table_item1_insys.setText("")
-        self.stock_create_table_item1_insys.setAlignment(QtCore.Qt.AlignCenter)
-        self.stock_create_table_item1_insys.setObjectName("stock_create_table_item1_insys")
-        self.stock_create_fact = QtWidgets.QSpinBox(self.stock_create_table_item1)
-        self.stock_create_fact.setGeometry(QtCore.QRect(1040, 0, 110, 35))
-        self.stock_create_fact.setStyleSheet("\n"
-                                             "background-color:rgb(91, 91, 91);\n"
-                                             "color: rgb(217, 217, 217);\n"
-                                             "border-color: rgb(66, 66, 66);")
-        self.stock_create_fact.setAlignment(QtCore.Qt.AlignCenter)
-        self.stock_create_fact.setObjectName("stock_create_fact")
-        self.stock_create_writeOff_2 = QtWidgets.QSpinBox(self.stock_create_table_item1)
-        self.stock_create_writeOff_2.setGeometry(QtCore.QRect(1160, 0, 110, 35))
-        self.stock_create_writeOff_2.setStyleSheet("\n"
-                                                   "background-color:rgb(91, 91, 91);\n"
-                                                   "color: rgb(217, 217, 217);")
-        self.stock_create_writeOff_2.setAlignment(QtCore.Qt.AlignCenter)
-        self.stock_create_writeOff_2.setObjectName("stock_create_writeOff_2")
+
+        def showStockList(data):
+            for i, item in enumerate(data):
+                self.stock_create_header.setText('Новая инвентаризация')
+                self.stock_create_actions_combobox.setCurrentText('Действие')
+                self.stock_create_table_item1 = QtWidgets.QWidget(self.stock_create_scrollAreaWidgetContents)
+                self.stock_create_table_item1.setGeometry(QtCore.QRect(0, 40*i, 1300, 35))
+                self.stock_create_table_item1.setMinimumSize(QtCore.QSize(0, 0))
+                self.stock_create_table_item1.setObjectName("stock_create_table_item" + str(i))
+                self.stock_create_table_checkbox = QtWidgets.QCheckBox(self.stock_create_table_item1)
+
+                self.stock_create_table_checkbox.setGeometry(QtCore.QRect(0, 0, 35, 35))
+                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+                sizePolicy.setHorizontalStretch(0)
+                sizePolicy.setVerticalStretch(0)
+                sizePolicy.setHeightForWidth(self.stock_create_table_checkbox.sizePolicy().hasHeightForWidth())
+                self.stock_create_table_checkbox.setSizePolicy(sizePolicy)
+                self.stock_create_table_checkbox.setMinimumSize(QtCore.QSize(0, 0))
+                self.stock_create_table_checkbox.setStyleSheet("QCheckBox::indicator { \n"
+                                                               "    width: 35px; \n"
+                                                               "    height: 35px;\n"
+                                                               "}\n"
+                                                               "QCheckBox {\n"
+                                                               "    background-color: rgb(91, 91, 91);\n"
+                                                               "    border-color: rgb(66, 66, 66);\n"
+                                                               "    border-radius: 6px;\n"
+                                                               "}")
+                self.stock_create_table_checkbox.setText("")
+                self.stock_create_table_checkbox.setIconSize(QtCore.QSize(40, 40))
+                self.stock_create_table_checkbox.setChecked(False)
+                self.stock_create_table_checkbox.setObjectName("stock_create_table_checkbox" + str(i))
+
+                self.stock_create_table_name_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
+                self.stock_create_table_name_lineEdit.setEnabled(False)
+                self.stock_create_table_name_lineEdit.setGeometry(QtCore.QRect(40, 0, 580, 35))
+                self.stock_create_table_name_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
+                font = QtGui.QFont()
+                font.setPointSize(12)
+                self.stock_create_table_name_lineEdit.setFont(font)
+                self.stock_create_table_name_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
+                                                                    "border-color: rgb(66, 66, 66);\n"
+                                                                    "background-color:rgb(71, 71, 71);\n"
+                                                                    "border-radius: 8px;\n"
+                                                                    "padding: 5px;")
+                self.stock_create_table_name_lineEdit.setText("")
+                self.stock_create_table_name_lineEdit.setObjectName("stock_create_table_name_lineEdit" + str(i))
+
+                self.stock_create_table_manufac_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
+                self.stock_create_table_manufac_lineEdit.setEnabled(False)
+                self.stock_create_table_manufac_lineEdit.setGeometry(QtCore.QRect(630, 0, 275, 35))
+                self.stock_create_table_manufac_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
+                font = QtGui.QFont()
+                font.setPointSize(12)
+                self.stock_create_table_manufac_lineEdit.setFont(font)
+                self.stock_create_table_manufac_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
+                                                                       "border-color: rgb(66, 66, 66);\n"
+                                                                       "background-color: rgb(71, 71, 71);\n"
+                                                                       "border-radius: 8px;\n"
+                                                                       "padding: 5px;")
+                self.stock_create_table_manufac_lineEdit.setText("")
+                self.stock_create_table_manufac_lineEdit.setObjectName("stock_create_table_manufac_lineEdit" + str(i))
+                self.stock_create_table_item1_insys = QtWidgets.QLineEdit(self.stock_create_table_item1)
+                self.stock_create_table_item1_insys.setEnabled(False)
+                self.stock_create_table_item1_insys.setGeometry(QtCore.QRect(920, 0, 110, 35))
+                self.stock_create_table_item1_insys.setMinimumSize(QtCore.QSize(0, 35))
+                font = QtGui.QFont()
+                font.setPointSize(12)
+                self.stock_create_table_item1_insys.setFont(font)
+                self.stock_create_table_item1_insys.setStyleSheet("color: rgb(217, 217, 217);\n"
+                                                                  "border-color: rgb(66, 66, 66);\n"
+                                                                  "background-color: rgb(71, 71, 71);\n"
+                                                                  "border-radius: 8px;\n"
+                                                                  "padding: 5px;")
+                self.stock_create_table_item1_insys.setText("")
+                self.stock_create_table_item1_insys.setAlignment(QtCore.Qt.AlignCenter)
+                self.stock_create_table_item1_insys.setObjectName("stock_create_table_item1_insys" + str(i))
+                self.stock_create_fact = QtWidgets.QSpinBox(self.stock_create_table_item1)
+                self.stock_create_fact.setGeometry(QtCore.QRect(1040, 0, 110, 35))
+                self.stock_create_fact.setStyleSheet("\n"
+                                                     "background-color:rgb(91, 91, 91);\n"
+                                                     "color: rgb(217, 217, 217);\n"
+                                                     "border-color: rgb(66, 66, 66);")
+                self.stock_create_fact.setAlignment(QtCore.Qt.AlignCenter)
+                self.stock_create_fact.setObjectName("stock_create_fact" + str(i))
+                self.stock_create_writeOff_2 = QtWidgets.QSpinBox(self.stock_create_table_item1)
+                self.stock_create_writeOff_2.setGeometry(QtCore.QRect(1160, 0, 110, 35))
+                self.stock_create_writeOff_2.setStyleSheet("\n"
+                                                           "background-color:rgb(91, 91, 91);\n"
+                                                           "color: rgb(217, 217, 217);")
+                self.stock_create_writeOff_2.setAlignment(QtCore.Qt.AlignCenter)
+                self.stock_create_writeOff_2.setObjectName("stock_create_writeOff" + str(i))
+
+                self.stock_create_table_name_lineEdit.setText(item['name'])
+                self.stock_create_table_manufac_lineEdit.setText(item['manufacturer'])
+                self.stock_create_table_item1_insys.setText(str(item['amount']))
+
         self.stock_create_scrollArea.setWidget(self.stock_create_scrollAreaWidgetContents)
         self.stock_create_search_lineEdit = QtWidgets.QLineEdit(self.stock_create)
         self.stock_create_search_lineEdit.setGeometry(QtCore.QRect(60, 120, 401, 35))
@@ -294,10 +290,10 @@ class StockPage(object):
                                                          "border-color: rgb(66, 66, 66);\n"
                                                          "border-radius: 8px;")
         self.stock_create_actions_combobox.setObjectName("stock_create_actions_combobox")
-        self.stock_create_actions_combobox.addItem("")
-        self.stock_create_actions_combobox.addItem("")
-        self.stock_create_actions_combobox.addItem("")
-        self.stock_create_actions_combobox.addItem("")
+        self.stock_create_actions_combobox.addItems(fetchInventActions())
+
+        showStockList(self.stockData)
+
         self.stock_create_saveBtn = QtWidgets.QPushButton(self.stock_create)
         self.stock_create_saveBtn.setGeometry(QtCore.QRect(1000, 120, 150, 35))
         font = QtGui.QFont()
@@ -385,17 +381,7 @@ class StockPage(object):
         item = self.stock_main_table.horizontalHeaderItem(6)
         item.setText(_translate("MainWindow", "Зарезервировано"))
         self.stock_main_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
-        self.stock_create_header.setText(_translate("MainWindow", "Инвентаризация 12312"))
-        self.stock_create_table_name_lineEdit.setPlaceholderText(
-            _translate("MainWindow", "Молоко ультра пастеризованное 900 мл"))
-        self.stock_create_table_manufac_lineEdit.setPlaceholderText(_translate("MainWindow", "ООО Простоквашено"))
-        self.stock_create_table_item1_insys.setPlaceholderText(_translate("MainWindow", "0"))
         self.stock_create_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
-        self.stock_create_actions_combobox.setPlaceholderText(_translate("MainWindow", "Действия"))
-        self.stock_create_actions_combobox.setItemText(0, _translate("MainWindow", "Выделить все"))
-        self.stock_create_actions_combobox.setItemText(1, _translate("MainWindow", "Снять все"))
-        self.stock_create_actions_combobox.setItemText(2, _translate("MainWindow", "Показать выделенные"))
-        self.stock_create_actions_combobox.setItemText(3, _translate("MainWindow", "Показать все"))
         self.stock_create_saveBtn.setText(_translate("MainWindow", "СОХРАНИТЬ"))
         self.stock_create_closeBtn.setText(_translate("MainWindow", "ЗАКРЫТЬ"))
         self.stock_create_table_item.setText(_translate("MainWindow", "Товар"))
