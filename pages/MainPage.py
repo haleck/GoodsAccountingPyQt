@@ -156,7 +156,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_create_back_image.setPixmap(QtGui.QPixmap("assets/back.png"))
         self.items_create_back_image.setObjectName("items_create_back_image")
         self.items_create_header = QtWidgets.QLabel(self.items_create)
-        self.items_create_header.setGeometry(QtCore.QRect(180, 100, 191, 22))
+        self.items_create_header.setGeometry(QtCore.QRect(180, 100, 400, 22))
         font = QtGui.QFont()
         font.setPointSize(16)
         self.items_create_header.setFont(font)
@@ -831,6 +831,16 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # Event listeners
 
+        # Search
+        self.items_main_search_img.mousePressEvent = lambda x: perform_search(self.items_main_search_lineEdit.text(), self.items_main_table)
+        self.stock_main_searchImg.mousePressEvent = lambda x: perform_search(self.stock_main_lineEdit.text(), self.stock_main_table)
+        self.orders_main_search_img.mousePressEvent = lambda x: perform_search(self.orders_main_search_lineEdit.text(), self.orders_main_table)
+        self.returns_main_search_img.mousePressEvent = lambda x: perform_search(self.returns_main_search_lineEdit.text(), self.returns_main_table)
+        self.getStocks_main_searchImg.mousePressEvent = lambda x: perform_search(self.getStocks_main_search_lineEdit.text(), self.getStocks_main_table)
+        self.writeOffs_main_searchImg.mousePressEvent = lambda x: perform_search(self.writeOffs_main_search.text(), self.writeOffs_main_table)
+        self.watch_search_img.mousePressEvent = lambda x: perform_search(self.watch_search_lineEdit.text(), self.watch_table)
+        self.employees_main_search_img.mousePressEvent = lambda x: perform_search(self.employees_main_search_lineEdit.text(), self.employees_main_table)
+
         # Items
         self.items_main_add_image.mousePressEvent = self.setItemsCreatePage
         self.items_create_back_image.mousePressEvent = self.setItemsMainPage
@@ -884,6 +894,13 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     def setItemsMainPage(self, event):
         self.items_stackedWidget.setCurrentIndex(0)
     def setItemsCreatePage(self, event):
+        self.items_create_header.setText('Добавление товара')
+        self.items_create_fieldItem_lineEdit.setText('')
+        self.items_create_descr_textEdit.setText('')
+        self.items_create_category_comboBox.setCurrentText('Не выбран')
+        self.items_create_manufact_comboBox.setCurrentText('Не выбран')
+        self.items_create_edizm_ComboBox.setCurrentText('Шт')
+        self.items_create_price_lineEdit.setText('0')
         self.items_stackedWidget.setCurrentIndex(1)
     def itemsCreateClose(self):
         self.items_stackedWidget.setCurrentIndex(0)
@@ -893,6 +910,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_stackedWidget.setCurrentIndex(0)
     def setUpItemsCreatePage(self):
         row = self.itemsData[self.itemsCurrentRow]
+        self.items_create_header.setText('Редактирование товара')
         self.items_create_fieldItem_lineEdit.setText(row['name'])
         self.items_create_descr_textEdit.setText(row['description'])
         self.items_create_category_comboBox.setCurrentText(row['category'])
@@ -1080,7 +1098,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         item.setText(_translate("MainWindow", "Ед. изм."))
         item = self.items_main_table.horizontalHeaderItem(6)
         item.setText(_translate("MainWindow", "Цена"))
-        self.items_create_header.setText(_translate("MainWindow", "Код товара: 12312"))
+        self.items_create_header.setText(_translate("MainWindow", "Добавление товара"))
         self.items_create_fieldItemHeader.setText(_translate("MainWindow", "Наименование товара"))
         self.items_create_fieldItem_lineEdit.setPlaceholderText(_translate("MainWindow", "Введите наименование товара"))
         self.items_create_descr_textEdit.setPlaceholderText(_translate("MainWindow", "Введите описание"))

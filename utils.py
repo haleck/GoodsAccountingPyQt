@@ -1,9 +1,9 @@
 def fetchCategories():
-    return ["Название категории 1", "Название категории 2", "Название категории 3"]
+    return ["Не выбран", "Название категории 1", "Название категории 2", "Название категории 3"]
 
 
 def fetchManufacturers():
-    return ["Производитель 1", "Производитель 2", "Производитель 3", "Производитель 4", "Производитель 5", ]
+    return ["Не выбран", "Производитель 1", "Производитель 2", "Производитель 3", "Производитель 4", "Производитель 5", ]
 
 
 def fetchUnits():
@@ -477,3 +477,16 @@ def fetchWriteOffs():
         {'id': 4, 'date': '25.06.2023', 'itemName': 'Сыр', 'amount': 2, 'cause': 'Нарушена упаковки', 'manufacturer': 'Производитель товара 4'},
         {'id': 5, 'date': '25.06.2023', 'itemName': 'Торт', 'amount': 1, 'cause': 'Срок годности', 'manufacturer': 'Производитель товара 5'},
     ]
+
+def perform_search(search_query ,table):
+    for row in range(table.rowCount()):
+        text_in_row = ""
+        for col in range(table.columnCount()):
+            item = table.item(row, col)
+            if item:
+                text_in_row += item.text()
+
+        if search_query.lower() in text_in_row.lower():
+            table.setRowHidden(row, False)
+        else:
+            table.setRowHidden(row, True)
