@@ -1,6 +1,14 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QCompleter
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+db_url = "postgresql://zdiroog:password@localhost/db"
+engine = create_engine(db_url)
+
+Session = sessionmaker(bind=engine)
+session = Session()
 
 
 def fetchCategories():
