@@ -4,11 +4,252 @@ from PyQt5.QtWidgets import QCompleter
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+
+class Statuses(Base):
+    __tablename__ = 'Statuses'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+
+    order = relationship('Orders', back_populates='status')
+
+
+class Orders(Base):
+    __tablename__ = 'Orders'
+
+    id = Column(Integer, primary_key=True)
+    address = Column(String)
+    dateAndTime = Column(String)
+    status_id = Column(Integer, ForeignKey('Statuses.id'))
+
+    status = relationship('Statuses', back_populates='order')
+    Return = relationship('Returns', back_populates='order')
+    itemInOrder = relationship('ItemsInOrders', back_populates='order')
+
+
+class Returns(Base):
+    __tablename__ = 'Returns'
+
+    id = Column(Integer, primary_key=True)
+    dateAndTime = Column(String)
+    order_id = Column(Integer, ForeignKey('Orders.id'))
+
+    order = relationship('Orders', back_populates='Return')
+    itemInReturn = relationship('ItemsInReturns', back_populates='return1')
+
+
+class ItemsInOrders(Base):
+    __tablename__ = 'ItemsInOrders'
+
+    item_id = Column(Integer, ForeignKey('Items.id'), primary_key=True)
+    order_id = Column(Integer, ForeignKey('Orders.id'), primary_key=True)
+    amount = Column(Integer)
+
+    order = relationship('Orders', back_populates='itemInOrder')
+    item = relationship('Items', back_populates='itemInOrder')
+
+
+class Items(Base):
+    __tablename__ = 'Items'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    price = Column(Integer, nullable=True)
+    description = Column(String, nullable=True)
+    amount = Column(Integer, nullable=True)
+    category_id = Column(Integer, ForeignKey('Categories.id'), nullable=True)
+    unit_id = Column(Integer, ForeignKey('Units.id'), nullable=True)
+    manufacturer_id = Column(Integer, ForeignKey('Manufacturers.id'), nullable=True)
+
+    category = relationship('Categories', back_populates='item')
+    unit = relationship('Units', back_populates='item')
+    manufacturer = relationship('Manufacturers', back_populates='item')
+    itemInOrder = relationship('ItemsInOrders', back_populates='item')
+    itemInReturn = relationship('ItemsInReturns', back_populates='item')
+    itemInInventory = relationship('ItemsInInventory', back_populates='item')
+    writeOff = relationship('WriteOffs', back_populates='item')
+    itemInGetStock = relationship('ItemsInGetStocks', back_populates='item')
+
+
+class Categories(Base):
+    __tablename__ = 'Categories'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+
+    item = relationship('Items', back_populates='category')
+
+
+class Units(Base):
+    __tablename__ = 'Units'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+
+    item = relationship('Items', back_populates='unit')
+
+
+class Manufacturers(Base):
+    __tablename__ = 'Manufacturers'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    address = Column(String, nullable=True)
+    phoneNumber = Column(String, nullable=True)
+
+    item = relationship('Items', back_populates='manufacturer')
+
+
+class ItemsInReturns(Base):
+    __tablename__ = 'ItemsInReturns'
+
+    item_id = Column(Integer, ForeignKey('Items.id'), primary_key=True)
+    return_id = Column(Integer, ForeignKey('Returns.id'), primary_key=True)
+    amount = Column(String)
+    cause_id = Column(Integer, ForeignKey('CausesToReturn.id'))
+
+    cause = relationship('CausesToReturn', back_populates='itemInReturn')
+    item = relationship('Items', back_populates='itemInReturn')
+    return1 = relationship('Returns', back_populates='itemInReturn')
+
+
+class CausesToReturn(Base):
+    __tablename__ = 'CausesToReturn'
+
+    id = Column(Integer, primary_key=True)
+    cause = Column(String, unique=True)
+
+    itemInReturn = relationship('ItemsInReturns', back_populates='cause')
+
+
+class ItemsInInventory(Base):
+    __tablename__ = 'ItemsInInventory'
+
+    item_id = Column(Integer, ForeignKey('Items.id'), primary_key=True)
+    inventory_id = Column(Integer, ForeignKey('Inventory.id'), primary_key=True)
+    currentAmount = Column(Integer, nullable=True)
+    factAmount = Column(Integer)
+    writeOffAmount = Column(Integer, nullable=True)
+
+    item = relationship('Items', back_populates='itemInInventory')
+    inventory = relationship('Inventory', back_populates='itemInInventory')
+
+
+class Inventory(Base):
+    __tablename__ = 'Inventory'
+
+    id = Column(Integer, primary_key=True)
+    dateAndTime = Column(String)
+
+    itemInInventory = relationship('ItemsInInventory', back_populates='inventory')
+
+
+class WriteOffs(Base):
+    __tablename__ = 'WriteOffs'
+
+    id = Column(Integer, primary_key=True)
+    item_id = Column(Integer, ForeignKey('Items.id'))
+    cause_id = Column(Integer, ForeignKey('CausesToWriteOff.id'))
+    amount = Column(Integer)
+    dateAndTime = Column(String)
+
+    item = relationship('Items', back_populates='writeOff')
+    cause = relationship('CausesToWriteOff', back_populates='writeOff')
+
+
+class CausesToWriteOff(Base):
+    __tablename__ = 'CausesToWriteOff'
+
+    id = Column(Integer, primary_key=True)
+    cause = Column(String, unique=True)
+
+    writeOff = relationship('WriteOffs', back_populates='cause')
+
+
+class ItemsInGetStocks(Base):
+    __tablename__ = 'ItemsInGetstocks'
+
+    item_id = Column(Integer, ForeignKey('Items.id'), primary_key=True)
+    getStock_id = Column(Integer, ForeignKey('GetStocks.id'), primary_key=True)
+    amount = Column(Integer)
+    goodQualityAmount = Column(Integer, nullable=True)
+
+    item = relationship('Items', back_populates='itemInGetStock')
+    getStock = relationship('GetStocks', back_populates='itemInGetStock')
+
+
+class GetStocks(Base):
+    __tablename__ = 'GetStocks'
+
+    id = Column(Integer, primary_key=True)
+    dateAndTime = Column(String)
+
+    itemInGetStock = relationship('ItemsInGetStocks', back_populates='getStock')
+
+
+class Users(Base):
+    __tablename__ = 'Users'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    surname = Column(String)
+    patronymic = Column(String, nullable=True)
+    nickname = Column(String, unique=True)
+    password = Column(String)
+    phoneNumber = Column(String, nullable=True)
+    role_id = Column(Integer, ForeignKey('Roles.id'))
+
+    log = relationship('LogTable', back_populates='user')
+    role = relationship('Roles', back_populates='user')
+
+
+class Roles(Base):
+    __tablename__ = 'Roles'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+
+    user = relationship('Users', back_populates='role')
+
+
+class LogTable(Base):
+    __tablename__ = 'LogTable'
+
+    id = Column(Integer, primary_key=True)
+    action_id = Column(Integer, ForeignKey('ActionsTable.id'))
+    user_id = Column(Integer, ForeignKey('Users.id'))
+    dateAndTime = Column(String)
+
+    action = relationship('ActionsTable', 'log')
+    user = relationship('Users', back_populates='log')
+
+
+class ActionsTable(Base):
+    __tablename__ = 'ActionsTable'
+
+    id = Column(Integer, primary_key=True)
+    action = Column(String, unique=True)
+
+    log = relationship('LogTable', back_populates='action')
+
 db_url = "postgresql://zdiroog:password@localhost/db"
 engine = create_engine(db_url)
 
+Base.metadata.create_all(engine)
+
 Session = sessionmaker(bind=engine)
 session = Session()
+
+session.add(Statuses(name='Создан'))
+
+itemsQuery = session.query(Statuses)
+print(itemsQuery)
 
 
 def fetchCategories():
@@ -36,34 +277,19 @@ def fetchCausesToReturn():
     return ['Нарушена упаковка', "Неполный комплект", "Не тот товар", "Товар поврежден", "Бракованный товар",
             "Не выбрано"]
 
+
 def fetchCausesToWriteOff():
     return ["Не выбрано", "Другое", "Истек срок годности", "Нарушены условия хранения"]
+
 
 def fetchInventActions():
     return ['Действия', 'Выделить все', 'Снять все', 'Показать выделенные', 'Показать все']
 
 
 def fetchItems():
-    return [
-        {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-        {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-        {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-        {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-        {'id': 5, 'name': 'Название товара 5', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 5', 'manufacturer': 'Производитель 2', 'amount': 1},
-        {'id': 6, 'name': 'Название товара 6', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 6', 'manufacturer': 'Производитель 3', 'amount': 5},
-        {'id': 7, 'name': 'Название товара 7', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 7', 'manufacturer': 'Производитель 3', 'amount': 1},
-        {'id': 8, 'name': 'Название товара 8', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 8', 'manufacturer': 'Производитель 4', 'amount': 10},
-        {'id': 9, 'name': 'Название товара 9', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 9', 'manufacturer': 'Производитель 5', 'amount': 8},
-    ]
+    # {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
+    #          'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
+    return itemsQuery
 
 
 def fetchActions():
