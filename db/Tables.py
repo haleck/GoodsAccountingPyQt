@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -8,9 +8,9 @@ class Statuses(Base):
     __tablename__ = 'Statuses'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, unique=True)
 
-    orders = relationship('Orders', back_populates='status')
+    order = relationship('Orders', back_populates='status')
 
 
 class Orders(Base):
@@ -19,10 +19,11 @@ class Orders(Base):
     id = Column(Integer, primary_key=True)
     address = Column(String)
     dateAndTime = Column(String)
-    status = relationship('Statuses', back_populates='id')
+    status_id = Column(Integer, ForeignKey('Statuses.id'))
 
-    returns = relationship('Returns', back_populates='order')
-    itemsInOrders = relationship('ItemsInOrders', back_populates='order_id')
+    status = relationship('Statuses', back_populates='order')
+    Return = relationship('Returns', back_populates='order')
+    itemInOrder = relationship('ItemsInOrders', back_populates='order')
 
 
 class Returns(Base):
@@ -30,9 +31,10 @@ class Returns(Base):
 
     id = Column(Integer, primary_key=True)
     dateAndTime = Column(String)
-    order = relationship('Orders', back_populates='id')
+    order_id = Column(Integer, ForeignKey('Orders.id'))
 
-    ItemsInReturns = relationship('ItemsInReturns', back_populates='return_id')
+    order = relationship('Orders', back_populates='Return')
+    itemInReturn = relationship('ItemsInReturns', back_populates='Return')
 
 
 class ItemsInOrders(Base):
@@ -40,10 +42,11 @@ class ItemsInOrders(Base):
 
     item_id = Column(Integer, ForeignKey('Items.id'))
     order_id = Column(Integer, ForeignKey('Orders.id'))
-    __table_args__ = (
-        UniqueConstraint('item_id', 'order_id', name='id'),
-    )
+    PrimaryKeyConstraint(item_id, order_id, name='id')
     amount = Column(Integer)
+
+    order = relationship('Orders', back_populates='itemInOrder')
+    item = relationship('Items', back_populates='itemInOrder')
 
 
 class Items(Base):
@@ -51,18 +54,21 @@ class Items(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    category = relationship('Categories', back_populates='id')
-    unit = relationship('Units', back_populates='id')
     price = Column(Integer)
     description = Column(String)
-    manufacturer = relationship('Manufacturers', back_populates='id')
     amount = Column(Integer)
+    category_id = Column(Integer, ForeignKey('Categories.id'))
+    unit_id = Column(Integer, ForeignKey('Units.id'))
+    manufacturer_id = Column(Integer, ForeignKey('Manufacturers.id'))
 
-    itemsInOrders = relationship('ItemsInOrders', back_populates='item_id')
-    itemsInReturns = relationship('ItemsInReturns', back_populates='item_id')
-    itemsInInventory = relationship('ItemsInInventory', back_populates='item_id')
+    category = relationship('Categories', back_populates='item')
+    unit = relationship('Units', back_populates='item')
+    manufacturer = relationship('Manufacturers', back_populates='item')
+    itemInOrder = relationship('ItemsInOrders', back_populates='item')
+    itemInReturn = relationship('ItemsInReturns', back_populates='item')
+    itemInInventory = relationship('ItemsInInventory', back_populates='item')
     writeOff = relationship('WriteOffs', back_populates='item')
-    itemsInGetStocks = relationship('ItemsInGetStocks', back_populates='item_id')
+    itemInGetStock = relationship('ItemsInGetStocks', back_populates='item')
 
 
 class Categories(Base):
@@ -70,6 +76,7 @@ class Categories(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
+    item_id = Column(Integer, ForeignKey('Items.id'))
 
     items = relationship('Items', back_populates='category')
 
@@ -79,8 +86,9 @@ class Units(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
+    item_id = Column(Integer, ForeignKey('Item.id'))
 
-    items = relationship('Items', back_populates='unit')
+    item = relationship('Items', back_populates='unit')
 
 
 class Manufacturers(Base):
@@ -91,7 +99,7 @@ class Manufacturers(Base):
     address = Column(String)
     phoneNumber = Column(String)
 
-    items = relationship('Items', back_populates='manufacturer')
+    item = relationship('Items', back_populates='manufacturer')
 
 
 class ItemsInReturns(Base):
@@ -99,10 +107,11 @@ class ItemsInReturns(Base):
 
     item_id = Column(Integer, ForeignKey('Items.id'))
     return_id = Column(Integer, ForeignKey('Returns.id'))
-    __table_args__ = (
-        UniqueConstraint('item_id', 'return_id', name='id'),
-    )
+    PrimaryKeyConstraint(item_id, return_id, name='id'),
     cause = relationship('CausesToReturn', back_populates='id')
+
+    item = relationship('Items', back_populates='itemInReturn')
+    Retrun = relationship('Returns', back_populates='itemInReturn')
 
 
 class CausesToReturn(Base):
@@ -111,7 +120,7 @@ class CausesToReturn(Base):
     id = Column(Integer, primary_key=True)
     cause = Column(String, unique=True)
 
-    ItemsInReturns = relationship('ItemsInReturns', back_populates='cause')
+    itemsInReturn = relationship('ItemsInReturns', back_populates='cause')
 
 
 class ItemsInInventory(Base):
@@ -119,12 +128,13 @@ class ItemsInInventory(Base):
 
     item_id = Column(Integer, ForeignKey('Items.id'))
     inventory_id = Column(Integer, ForeignKey('Inventory.id'))
-    __table_args__ = (
-        UniqueConstraint('item_id', 'inventory_id', name='id'),
-    )
+    PrimaryKeyConstraint(item_id, inventory_id, name='id'),
     currentAmount = Column(Integer)
     factAmount = Column(Integer)
     writeOffAmount = Column(Integer)
+
+    item = relationship('Items', back_populates='itemInInventory')
+    inventory = relationship('Inventory', back_populates='itemInInventory')
 
 
 class Inventory(Base):
@@ -133,16 +143,19 @@ class Inventory(Base):
     id = Column(Integer, primary_key=True)
     dateAndTime = Column(String)
 
-    ItemsInInventory = relationship('ItemsInInventory', back_populates='inventory_id')
+    ItemsInInventory = relationship('ItemsInInventory', back_populates='inventory')
 
 
 class writeOffs(Base):
     __tablename__ = 'WriteOffs'
 
     id = Column(Integer, primary_key=True)
-    item = relationship('Items', back_populates='id')
-    cause = relationship('CausesToWriteOff', back_populates='id')
+    item_id = Column(Integer, ForeignKey('Items.id'))
+    cause_id = Column(Integer, ForeignKey('Causes.id'))
     dateAndTime = Column(String)
+
+    item = relationship('Items', back_populates='writeOff')
+    cause = relationship('CausesToWriteOff', back_populates='writeOff')
 
 
 class CausesToWriteOff(Base):
@@ -158,12 +171,13 @@ class ItemsInGetStocks(Base):
     __tablename__ = 'ItemsInGetstocks'
 
     item_id = Column(Integer, ForeignKey('Items.id'))
-    getStocks_id = Column(Integer, ForeignKey('GetStocks.id'))
-    __table_args__ = (
-        UniqueConstraint('item_id', 'getStocks_id', name='id'),
-    )
+    getStock_id = Column(Integer, ForeignKey('GetStocks.id'))
+    PrimaryKeyConstraint(item_id, getStock_id, name='id'),
     amount = Column(Integer)
     goodQualityAmount = Column(Integer)
+
+    item = relationship('Items', back_populates='itemInGetStock')
+    getStock = relationship('GetStocks', back_populates='itemInGetStock')
 
 
 class GetStocks(Base):
@@ -172,7 +186,7 @@ class GetStocks(Base):
     id = Column(Integer, primary_key=True)
     dateAndTime = Column(String)
 
-    itemsInGetStocks = relationship('ItemsInGetStocks', back_populates='getStocks_id')
+    itemInGetStock = relationship('ItemsInGetStocks', back_populates='getStock')
 
 
 class Users(Base):
@@ -185,9 +199,10 @@ class Users(Base):
     nickname = Column(String)
     password = Column(String)
     phoneNumber = Column(String)
-    role = relationship('Roles', back_populates='id')
+    role_id = Column(Integer, ForeignKey('Roles.id'))
 
     log = relationship('Log', back_populates='user')
+    role = relationship('Roles', back_populates='user')
 
 
 class Roles(Base):
@@ -203,9 +218,12 @@ class Log(Base):
     __tablename__ = 'Log'
 
     id = Column(Integer, primary_key=True)
-    action = relationship('Actions', 'id')
-    user = relationship('Users', back_populates='id')
+    action_id = Column(Integer, ForeignKey('Actons.id'))
+    user_id = Column(Integer, ForeignKey('Users.id'))
     dateAndTime = Column(String)
+
+    action = relationship('Actions', 'log')
+    user = relationship('Users', back_populates='log')
 
 
 class Actions(Base):
