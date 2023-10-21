@@ -16,7 +16,8 @@ def fetchCategories():
 
 
 def fetchManufacturers():
-    return ["Не выбран", "Производитель 1", "Производитель 2", "Производитель 3", "Производитель 4", "Производитель 5", ]
+    return ["Не выбран", "Производитель 1", "Производитель 2", "Производитель 3", "Производитель 4",
+            "Производитель 5", ]
 
 
 def fetchUnits():
@@ -30,11 +31,18 @@ def fetchRoles():
 def fetchStatuses():
     return ['Создан', 'Принят', 'Собирается', 'Отправлен', 'Принят на складе', 'Передан курьеру', 'Завершен', ]
 
-def fetchCauses():
-    return ['Нарушена упаковка', "Неполный комплект", "Не тот товар", "Товар поврежден", "Бракованный товар", "Не выбрано"]
+
+def fetchCausesToReturn():
+    return ['Нарушена упаковка', "Неполный комплект", "Не тот товар", "Товар поврежден", "Бракованный товар",
+            "Не выбрано"]
+
+def fetchCausesToWriteOff():
+    return ["Не выбрано", "Другое", "Истек срок годности", "Нарушены условия хранения"]
 
 def fetchInventActions():
     return ['Действия', 'Выделить все', 'Снять все', 'Показать выделенные', 'Показать все']
+
+
 def fetchItems():
     return [
         {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
@@ -162,7 +170,8 @@ def fetchOrders():
              {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
              {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},{'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
+              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
+             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
              {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
@@ -199,7 +208,8 @@ def fetchOrders():
              {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
              {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},{'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
+              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
+             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
              {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
@@ -212,7 +222,8 @@ def fetchOrders():
              {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
              {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},{'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
+              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
+             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
              {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
               'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
@@ -348,6 +359,7 @@ def fetchOrders():
          'items': []},
     ]
 
+
 def fetchReturns():
     return [
         {'id': 1, 'orderId': 1, 'cause': 'Нарушена упаковка', 'date': '12.04.2023'},
@@ -357,10 +369,12 @@ def fetchReturns():
         {'id': 5, 'orderId': 5, 'cause': 'Не полный комплект', 'date': '02.05.2023'},
     ]
 
+
 def getItemsByOrderId(id: str):
     order = filter(lambda x: x['id'] == id, fetchOrders())
     order = list(order)[0]
     return order['items']
+
 
 def fetchGetStocks():
     return [
@@ -428,17 +442,23 @@ def fetchGetStocks():
         {'id': 5, 'date': '24.06.2023', 'time': '16:40', 'items': []},
     ]
 
+
 def fetchWriteOffs():
     return [
-        {'id': 1, 'date': '23.06.2023', 'itemName': 'Молоко', 'amount': 2, 'cause': 'Нарушена упаковки', 'manufacturer': 'Производитель товара 1'},
-        {'id': 2, 'date': '23.06.2023', 'itemName': 'Кефир', 'amount': 2, 'cause': 'Срок годности', 'manufacturer': 'Производитель товара 2'},
-        {'id': 3, 'date': '24.06.2023', 'itemName': 'Сгущенка', 'amount': 2, 'cause': 'Срок годности', 'manufacturer': 'Производитель товара 3'},
-        {'id': 4, 'date': '25.06.2023', 'itemName': 'Сыр', 'amount': 2, 'cause': 'Нарушена упаковки', 'manufacturer': 'Производитель товара 4'},
-        {'id': 5, 'date': '25.06.2023', 'itemName': 'Торт', 'amount': 1, 'cause': 'Срок годности', 'manufacturer': 'Производитель товара 5'},
+        {'id': 1, 'date': '23.06.2023', 'itemName': 'Молоко', 'amount': 2, 'cause': 'Нарушена упаковки',
+         'manufacturer': 'Производитель товара 1'},
+        {'id': 2, 'date': '23.06.2023', 'itemName': 'Кефир', 'amount': 2, 'cause': 'Срок годности',
+         'manufacturer': 'Производитель товара 2'},
+        {'id': 3, 'date': '24.06.2023', 'itemName': 'Сгущенка', 'amount': 2, 'cause': 'Срок годности',
+         'manufacturer': 'Производитель товара 3'},
+        {'id': 4, 'date': '25.06.2023', 'itemName': 'Сыр', 'amount': 2, 'cause': 'Нарушена упаковки',
+         'manufacturer': 'Производитель товара 4'},
+        {'id': 5, 'date': '25.06.2023', 'itemName': 'Торт', 'amount': 1, 'cause': 'Срок годности',
+         'manufacturer': 'Производитель товара 5'},
     ]
 
 
-def perform_search(search_query ,table):
+def perform_search(search_query, table):
     for row in range(table.rowCount()):
         text_in_row = ""
         for col in range(table.columnCount()):

@@ -138,19 +138,18 @@ class WriteOffsPage(object):
         self.writeOff_create_cause_header.setFont(font)
         self.writeOff_create_cause_header.setStyleSheet("color: rgb(217, 217, 217);")
         self.writeOff_create_cause_header.setObjectName("writeOff_create_cause_header")
-        self.writeOff_create_cause_lineEdit = QtWidgets.QLineEdit(self.writeOff_create_cause_widget)
-        self.writeOff_create_cause_lineEdit.setGeometry(QtCore.QRect(0, 60, 1301, 35))
-        self.writeOff_create_cause_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
+        self.writeOff_create_cause_comboBox = QtWidgets.QComboBox(self.writeOff_create_cause_widget)
+        self.writeOff_create_cause_comboBox.setGeometry(QtCore.QRect(0, 60, 1301, 35))
+        self.writeOff_create_cause_comboBox.setMinimumSize(QtCore.QSize(0, 35))
         font = QtGui.QFont()
         font.setPointSize(12)
-        self.writeOff_create_cause_lineEdit.setFont(font)
-        self.writeOff_create_cause_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
+        self.writeOff_create_cause_comboBox.setFont(font)
+        self.writeOff_create_cause_comboBox.setStyleSheet("color: rgb(217, 217, 217);\n"
                                                           "border-color: rgb(66, 66, 66);\n"
                                                           "background-color: rgb(91, 91, 91);\n"
-                                                          "border-radius: 8px;\n"
                                                           "padding: 5px;")
-        self.writeOff_create_cause_lineEdit.setText("")
-        self.writeOff_create_cause_lineEdit.setObjectName("writeOff_create_cause_lineEdit")
+        self.writeOff_create_cause_comboBox.addItems(fetchCausesToWriteOff())
+        self.writeOff_create_cause_comboBox.setObjectName("writeOff_create_cause_lineEdit")
         self.writeOff_create_item_widget = QtWidgets.QWidget(self.writeOff_create)
         self.writeOff_create_item_widget.setGeometry(QtCore.QRect(60, 270, 661, 101))
         self.writeOff_create_item_widget.setMinimumSize(QtCore.QSize(0, 0))
@@ -289,7 +288,7 @@ class WriteOffsPage(object):
         self.writeOffs_main_search.setPlaceholderText(_translate("MainWindow", "Найти..."))
         self.page_header_6.setText(_translate("MainWindow", "Списание 1234123"))
         self.writeOff_create_cause_header.setText(_translate("MainWindow", "Причина"))
-        self.writeOff_create_cause_lineEdit.setPlaceholderText(_translate("MainWindow", "Введите причину"))
+        self.writeOff_create_cause_comboBox.setPlaceholderText(_translate("MainWindow", "Введите причину"))
         self.writeOff_create_item_header.setText(_translate("MainWindow", "Товар"))
         self.writeOff_create_item_lineEdit.setPlaceholderText(_translate("MainWindow", "Выберите товар"))
         self.writeOff_create_manufac_header.setText(_translate("MainWindow", "Производитель"))

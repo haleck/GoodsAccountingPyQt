@@ -228,7 +228,7 @@ class ReturnsPage(object):
                                                          "border-radius: 8px;")
         self.returns_create_cause_comboBox.setObjectName("returns_create_cause_comboBox")
         self.returns_create_cause_comboBox.addItem("Не выбрано")
-        self.returns_create_cause_comboBox.addItems(fetchCauses())
+        self.returns_create_cause_comboBox.addItems(fetchCausesToReturn())
         self.returns_create_order_widget = QtWidgets.QWidget(self.returns_create)
         self.returns_create_order_widget.setGeometry(QtCore.QRect(60, 100, 501, 101))
         self.returns_create_order_widget.setMinimumSize(QtCore.QSize(0, 101))

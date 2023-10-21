@@ -1018,7 +1018,6 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     def setWriteOffsCreatePage(self, event):
         self.writeOffsCurrentRow = None
         self.page_header_6.setText('Новое списание')
-        self.writeOff_create_cause_lineEdit.setText('')
         self.writeOff_create_item_lineEdit.setText('')
         self.writeOff_create_manufac_lineEdit.setText('')
         self.writeOff_create_amount_spinbox.setValue(0)
@@ -1032,7 +1031,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     def setUpWrireOffsCreatePage(self):
         currentElement = self.writeOffsData[self.writeOffsCurrentRow]
         self.page_header_6.setText('Списание ' + str(currentElement['id']))
-        self.writeOff_create_cause_lineEdit.setText(currentElement['cause'])
+        self.writeOff_create_cause_comboBox.setText(currentElement['cause'])
         self.writeOff_create_item_lineEdit.setText(currentElement['itemName'])
         self.writeOff_create_manufac_lineEdit.setText(currentElement['manufacturer'])
         self.writeOff_create_amount_spinbox.setValue(currentElement['amount'])
