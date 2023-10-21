@@ -54,12 +54,12 @@ class Items(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    price = Column(Integer)
-    description = Column(String)
-    amount = Column(Integer)
-    category_id = Column(Integer, ForeignKey('Categories.id'))
-    unit_id = Column(Integer, ForeignKey('Units.id'))
-    manufacturer_id = Column(Integer, ForeignKey('Manufacturers.id'))
+    price = Column(Integer, nullable=True)
+    description = Column(String, nullable=True)
+    amount = Column(Integer, nullable=True)
+    category_id = Column(Integer, ForeignKey('Categories.id'), nullable=True)
+    unit_id = Column(Integer, ForeignKey('Units.id'), nullable=True)
+    manufacturer_id = Column(Integer, ForeignKey('Manufacturers.id'), nullable=True)
 
     category = relationship('Categories', back_populates='item')
     unit = relationship('Units', back_populates='item')
@@ -76,7 +76,6 @@ class Categories(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    item_id = Column(Integer, ForeignKey('Items.id'))
 
     items = relationship('Items', back_populates='category')
 
@@ -86,7 +85,6 @@ class Units(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    item_id = Column(Integer, ForeignKey('Item.id'))
 
     item = relationship('Items', back_populates='unit')
 
@@ -96,8 +94,8 @@ class Manufacturers(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    address = Column(String)
-    phoneNumber = Column(String)
+    address = Column(String, nullable=True)
+    phoneNumber = Column(String, nullable=True)
 
     item = relationship('Items', back_populates='manufacturer')
 
@@ -108,8 +106,10 @@ class ItemsInReturns(Base):
     item_id = Column(Integer, ForeignKey('Items.id'))
     return_id = Column(Integer, ForeignKey('Returns.id'))
     PrimaryKeyConstraint(item_id, return_id, name='id'),
-    cause = relationship('CausesToReturn', back_populates='id')
+    amount = Column(String)
+    cause_id = (String, ForeignKey('CausesToReturn.id'))
 
+    cause = relationship('CausesToReturn', back_populates='itemInReturn')
     item = relationship('Items', back_populates='itemInReturn')
     Retrun = relationship('Returns', back_populates='itemInReturn')
 
@@ -129,9 +129,9 @@ class ItemsInInventory(Base):
     item_id = Column(Integer, ForeignKey('Items.id'))
     inventory_id = Column(Integer, ForeignKey('Inventory.id'))
     PrimaryKeyConstraint(item_id, inventory_id, name='id'),
-    currentAmount = Column(Integer)
+    currentAmount = Column(Integer, nullable=True)
     factAmount = Column(Integer)
-    writeOffAmount = Column(Integer)
+    writeOffAmount = Column(Integer, nullable=True)
 
     item = relationship('Items', back_populates='itemInInventory')
     inventory = relationship('Inventory', back_populates='itemInInventory')
@@ -152,6 +152,7 @@ class writeOffs(Base):
     id = Column(Integer, primary_key=True)
     item_id = Column(Integer, ForeignKey('Items.id'))
     cause_id = Column(Integer, ForeignKey('Causes.id'))
+    amount = Column(Integer)
     dateAndTime = Column(String)
 
     item = relationship('Items', back_populates='writeOff')
@@ -162,7 +163,7 @@ class CausesToWriteOff(Base):
     __tablename__ = 'CausesToWriteOff'
 
     id = Column(Integer, primary_key=True)
-    cause = Column(String)
+    cause = Column(String, unique=True)
 
     writeOff = relationship('WriteOffs', back_populates='cause')
 
@@ -174,7 +175,7 @@ class ItemsInGetStocks(Base):
     getStock_id = Column(Integer, ForeignKey('GetStocks.id'))
     PrimaryKeyConstraint(item_id, getStock_id, name='id'),
     amount = Column(Integer)
-    goodQualityAmount = Column(Integer)
+    goodQualityAmount = Column(Integer, nullable=True)
 
     item = relationship('Items', back_populates='itemInGetStock')
     getStock = relationship('GetStocks', back_populates='itemInGetStock')
@@ -195,10 +196,10 @@ class Users(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     surname = Column(String)
-    patronymic = Column(String)
-    nickname = Column(String)
+    patronymic = Column(String, nullable=True)
+    nickname = Column(String, unique=True)
     password = Column(String)
-    phoneNumber = Column(String)
+    phoneNumber = Column(String, nullable=True)
     role_id = Column(Integer, ForeignKey('Roles.id'))
 
     log = relationship('Log', back_populates='user')
@@ -209,7 +210,7 @@ class Roles(Base):
     __tablename__ = 'Roles'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String, unique=True)
 
     user = relationship('Users', back_populates='role')
 
@@ -230,6 +231,6 @@ class Actions(Base):
     __tablename__ = 'Actions'
 
     id = Column(Integer, primary_key=True)
-    action = Column(String)
+    action = Column(String, unique=True)
 
     log = relationship('Log', back_populates='action')
