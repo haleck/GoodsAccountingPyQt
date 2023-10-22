@@ -1,6 +1,9 @@
+import peewee
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QObject
-from PyQt5.QtWidgets import QTableWidgetItem, QWidget
+from PyQt5.QtCore import Qt, QObject, QByteArray
+from PyQt5.QtWidgets import QTableWidgetItem, QWidget, QLabel, QPushButton, QVBoxLayout
+from reportlab.lib.pagesizes import landscape, letter, legal
+from reportlab.platypus import Image
 
 from pages.sells.StockPage import StockPage
 from pages.sells.OrdersPage import OrdersPage
@@ -10,15 +13,230 @@ from pages.sells.WriteOffsPage import WriteOffsPage
 
 from utils import *
 
+from reportlab.pdfgen import canvas
+from PyQt5.QtGui import QImage, QPixmap
+
+
 class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage):
+    def drawEmployeesTable(self):
+        self.employeesData = fetchEmployees()
+
+        self.employees_main_table = QtWidgets.QTableWidget(self.employees_main)
+        self.employees_main_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
+        self.employees_main_table.setObjectName("employees_main_table")
+        self.employees_main_table.setColumnCount(6)
+        self.employees_main_table.setRowCount(0)
+
+        self.employees_main_table.setColumnWidth(0, 216)
+        self.employees_main_table.setColumnWidth(1, 217)
+        self.employees_main_table.setColumnWidth(2, 216)
+        self.employees_main_table.setColumnWidth(3, 217)
+        self.employees_main_table.setColumnWidth(4, 216)
+        self.employees_main_table.setColumnWidth(5, 216)
+
+        item = QtWidgets.QTableWidgetItem()
+        self.employees_main_table.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.employees_main_table.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.employees_main_table.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.employees_main_table.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.employees_main_table.setHorizontalHeaderItem(4, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.employees_main_table.setHorizontalHeaderItem(5, item)
+
+        self.employees_main_table.setRowCount(len(self.employeesData))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(self.employeesData):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['surname'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['name'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['patronymic'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 3, cell)
+
+            cell = QTableWidgetItem(item['role'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 4, cell)
+
+            cell = QTableWidgetItem(item['number'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.employees_main_table.setItem(row, 5, cell)
+
+        self.employeesCurrentRow = None
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            self.employeesCurrentRow = row
+
+            for col in range(self.employees_main_table.columnCount()):
+                self.employees_main_table.item(row, col).setSelected(True)
+
+        self.employees_main_table.itemClicked.connect(on_item_click)
+
+        #
+        self.employees_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        item = self.employees_main_table.horizontalHeaderItem(0)
+        item.setText("Код сотрудника")
+        item = self.employees_main_table.horizontalHeaderItem(1)
+        item.setText("Фамилия")
+        item = self.employees_main_table.horizontalHeaderItem(2)
+        item.setText("Имя")
+        item = self.employees_main_table.horizontalHeaderItem(3)
+        item.setText("Отчество")
+        item = self.employees_main_table.horizontalHeaderItem(4)
+        item.setText("Роль")
+        item = self.employees_main_table.horizontalHeaderItem(5)
+        item.setText("Номер")
+    def drawItemsTable(self):
+        self.itemsData = fetchItems()
+
+        # Создание заголовков столбцов
+        for j in range(7):
+            item = QtWidgets.QTableWidgetItem()
+            self.items_main_table.setHorizontalHeaderItem(j, item)
+
+        self.items_main_table.setRowCount(len(self.itemsData))
+
+        item = self.items_main_table.horizontalHeaderItem(0)
+        item.setText("Код товара")
+        item = self.items_main_table.horizontalHeaderItem(1)
+        item.setText("Название")
+        item = self.items_main_table.horizontalHeaderItem(2)
+        item.setText("Производитель")
+        item = self.items_main_table.horizontalHeaderItem(3)
+        item.setText("Категория")
+        item = self.items_main_table.horizontalHeaderItem(4)
+        item.setText("Описание")
+        item = self.items_main_table.horizontalHeaderItem(5)
+        item.setText("Ед. изм.")
+        item = self.items_main_table.horizontalHeaderItem(6)
+        item.setText("Цена")
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(self.itemsData):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['name'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['manufacturer'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['category'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 3, cell)
+
+            cell = QTableWidgetItem(item['description'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 4, cell)
+
+            cell = QTableWidgetItem(item['unit'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 5, cell)
+
+            cell = QTableWidgetItem(str(item['price']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.items_main_table.setItem(row, 6, cell)
+
+        self.items_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    def drawWatchTable(self):
+        self.watchData = fetchActions()
+
+        self.watch_table = QtWidgets.QTableWidget(self.watch)
+        self.watch_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
+        self.watch_table.setObjectName("watch_table")
+        self.watch_table.setColumnCount(4)
+        self.watch_table.setRowCount(0)
+
+        self.watch_table.setColumnWidth(0, 325)
+        self.watch_table.setColumnWidth(1, 325)
+        self.watch_table.setColumnWidth(2, 324)
+        self.watch_table.setColumnWidth(3, 324)
+
+        item = QtWidgets.QTableWidgetItem()
+        self.watch_table.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.watch_table.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.watch_table.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.watch_table.setHorizontalHeaderItem(3, item)
+
+        self.watch_table.setRowCount(len(self.watchData))
+
+        # Заполнение таблицы данными
+        for row, item in enumerate(self.watchData):
+            cell = QTableWidgetItem(str(item['id']))
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 0, cell)
+
+            cell = QTableWidgetItem(item['action'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 1, cell)
+
+            cell = QTableWidgetItem(item['employee'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 2, cell)
+
+            cell = QTableWidgetItem(item['date'])
+            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
+            self.watch_table.setItem(row, 3, cell)
+
+        self.watch_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        item = self.watch_table.horizontalHeaderItem(0)
+        item.setText("Код изменения")
+        item = self.watch_table.horizontalHeaderItem(1)
+        item.setText("Действие")
+        item = self.watch_table.horizontalHeaderItem(2)
+        item.setText("Сотрудник")
+        item = self.watch_table.horizontalHeaderItem(3)
+        item.setText("Дата и время")
+
+        self.watchCurrentRow = None
+
+        # Выделение всей строки при клике
+        def on_item_click(item):
+            row = item.row()
+            self.watchCurrentRow = row
+
+            for col in range(self.watch_table.columnCount()):
+                self.watch_table.item(row, col).setSelected(True)
+
+        self.watch_table.itemClicked.connect(on_item_click)
+
+        #
+        self.watch_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    def addAdminTabs(self):
+        self.main_tab.addTab(self.watch, "")
+        self.main_tab.addTab(self.employees, "")
+        self.main_tab.setTabText(self.main_tab.indexOf(self.watch), "Отслеживание")
+        self.main_tab.setTabText(self.main_tab.indexOf(self.employees), "Сотрудники")
     def __init__(self):
         StockPage.__init__(self)
         OrdersPage.__init__(self)
         ReturnsPage.__init__(self)
         GetStocksPage.__init__(self)
         WriteOffsPage.__init__(self)
-
-
 
         self.main_page = QtWidgets.QWidget()
         self.main_page.setObjectName("main_page")
@@ -68,8 +286,6 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # Start of Items Table
 
-        self.itemsData = fetchItems()
-
         self.items_main_table = QtWidgets.QTableWidget(self.items_main)
         self.items_main_table.setGeometry(QtCore.QRect(70, 150, 1300, 700))
         self.items_main_table.setAlternatingRowColors(False)
@@ -85,44 +301,10 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_main_table.setColumnWidth(5, 149)
         self.items_main_table.setColumnWidth(6, 149)
 
-        # Создание заголовков столбцов
-        for j in range(7):
-            item = QtWidgets.QTableWidgetItem()
-            self.items_main_table.setHorizontalHeaderItem(j, item)
-
-        self.items_main_table.setRowCount(len(self.itemsData))
-
-        # Заполнение таблицы данными
-        for row, item in enumerate(self.itemsData):
-            cell = QTableWidgetItem(str(item['id']))
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.items_main_table.setItem(row, 0, cell)
-
-            cell = QTableWidgetItem(item['name'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.items_main_table.setItem(row, 1, cell)
-
-            cell = QTableWidgetItem(item['manufacturer'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.items_main_table.setItem(row, 2, cell)
-
-            cell = QTableWidgetItem(item['category'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.items_main_table.setItem(row, 3, cell)
-
-            cell = QTableWidgetItem(item['description'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.items_main_table.setItem(row, 4, cell)
-
-            cell = QTableWidgetItem(item['unit'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.items_main_table.setItem(row, 5, cell)
-
-            cell = QTableWidgetItem(str(item['price']))
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.items_main_table.setItem(row, 6, cell)
+        self.drawItemsTable()
 
         self.itemsCurrentRow = None
+
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
@@ -353,9 +535,9 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         # End of sells
 
         self.sells_tab.addTab(self.stock, "")
-        self.sells_tab.addTab(self.orders, "")
-        self.sells_tab.addTab(self.returns, "")
-        self.sells_tab.addTab(self.getStocks, "")
+        # self.sells_tab.addTab(self.orders, "")
+        # self.sells_tab.addTab(self.returns, "")
+        # self.sells_tab.addTab(self.getStocks, "")
         self.sells_tab.addTab(self.writeOffs, "")
 
         # End of sells
@@ -393,66 +575,12 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # Start of watch table
 
-        self.watchData = fetchActions()
-
-        self.watch_table = QtWidgets.QTableWidget(self.watch)
-        self.watch_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
-        self.watch_table.setObjectName("watch_table")
-        self.watch_table.setColumnCount(4)
-        self.watch_table.setRowCount(0)
-
-        self.watch_table.setColumnWidth(0, 325)
-        self.watch_table.setColumnWidth(1, 325)
-        self.watch_table.setColumnWidth(2, 324)
-        self.watch_table.setColumnWidth(3, 324)
-
-        item = QtWidgets.QTableWidgetItem()
-        self.watch_table.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.watch_table.setHorizontalHeaderItem(1, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.watch_table.setHorizontalHeaderItem(2, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.watch_table.setHorizontalHeaderItem(3, item)
-
-        self.watch_table.setRowCount(len(self.watchData))
-
-        # Заполнение таблицы данными
-        for row, item in enumerate(self.watchData):
-            cell = QTableWidgetItem(str(item['id']))
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.watch_table.setItem(row, 0, cell)
-
-            cell = QTableWidgetItem(item['action'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.watch_table.setItem(row, 1, cell)
-
-            cell = QTableWidgetItem(item['employee'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.watch_table.setItem(row, 2, cell)
-
-            cell = QTableWidgetItem(item['date'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.watch_table.setItem(row, 3, cell)
-
-        self.watchCurrentRow = None
-        # Выделение всей строки при клике
-        def on_item_click(item):
-            row = item.row()
-            self.watchCurrentRow = row
-
-            for col in range(self.watch_table.columnCount()):
-                self.watch_table.item(row, col).setSelected(True)
-
-        self.watch_table.itemClicked.connect(on_item_click)
-
-        #
-        self.watch_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.drawWatchTable()
 
         # End of watch table
         # End of watch
 
-        self.main_tab.addTab(self.watch, "")
+
 
         # Start of employees
 
@@ -465,75 +593,8 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_main.setObjectName("employees_main")
 
         # Start of Employees Table
-        self.employeesData = fetchEmployees()
 
-        self.employees_main_table = QtWidgets.QTableWidget(self.employees_main)
-        self.employees_main_table.setGeometry(QtCore.QRect(60, 150, 1300, 700))
-        self.employees_main_table.setObjectName("employees_main_table")
-        self.employees_main_table.setColumnCount(6)
-        self.employees_main_table.setRowCount(0)
-
-        self.employees_main_table.setColumnWidth(0, 216)
-        self.employees_main_table.setColumnWidth(1, 217)
-        self.employees_main_table.setColumnWidth(2, 216)
-        self.employees_main_table.setColumnWidth(3, 217)
-        self.employees_main_table.setColumnWidth(4, 216)
-        self.employees_main_table.setColumnWidth(5, 216)
-
-        item = QtWidgets.QTableWidgetItem()
-        self.employees_main_table.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.employees_main_table.setHorizontalHeaderItem(1, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.employees_main_table.setHorizontalHeaderItem(2, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.employees_main_table.setHorizontalHeaderItem(3, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.employees_main_table.setHorizontalHeaderItem(4, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.employees_main_table.setHorizontalHeaderItem(5, item)
-
-        self.employees_main_table.setRowCount(len(self.employeesData))
-
-        # Заполнение таблицы данными
-        for row, item in enumerate(self.employeesData):
-            cell = QTableWidgetItem(str(item['id']))
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.employees_main_table.setItem(row, 0, cell)
-
-            cell = QTableWidgetItem(item['surname'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.employees_main_table.setItem(row, 1, cell)
-
-            cell = QTableWidgetItem(item['name'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.employees_main_table.setItem(row, 2, cell)
-
-            cell = QTableWidgetItem(item['patronymic'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.employees_main_table.setItem(row, 3, cell)
-
-            cell = QTableWidgetItem(item['role'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.employees_main_table.setItem(row, 4, cell)
-
-            cell = QTableWidgetItem(item['number'])
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.employees_main_table.setItem(row, 5, cell)
-
-        self.employeesCurrentRow = None
-        # Выделение всей строки при клике
-        def on_item_click(item):
-            row = item.row()
-            self.employeesCurrentRow = row
-
-            for col in range(self.employees_main_table.columnCount()):
-                self.employees_main_table.item(row, col).setSelected(True)
-
-        self.employees_main_table.itemClicked.connect(on_item_click)
-
-        #
-        self.employees_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.drawEmployeesTable()
 
         # End of Employees Table
 
@@ -827,19 +888,27 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
         # End of employees
 
-        self.main_tab.addTab(self.employees, "")
+
 
         # Event listeners
 
         # Search
-        self.items_main_search_img.mousePressEvent = lambda x: perform_search(self.items_main_search_lineEdit.text(), self.items_main_table)
-        self.stock_main_searchImg.mousePressEvent = lambda x: perform_search(self.stock_main_lineEdit.text(), self.stock_main_table)
-        self.orders_main_search_img.mousePressEvent = lambda x: perform_search(self.orders_main_search_lineEdit.text(), self.orders_main_table)
-        self.returns_main_search_img.mousePressEvent = lambda x: perform_search(self.returns_main_search_lineEdit.text(), self.returns_main_table)
-        self.getStocks_main_searchImg.mousePressEvent = lambda x: perform_search(self.getStocks_main_search_lineEdit.text(), self.getStocks_main_table)
-        self.writeOffs_main_searchImg.mousePressEvent = lambda x: perform_search(self.writeOffs_main_search.text(), self.writeOffs_main_table)
-        self.watch_search_img.mousePressEvent = lambda x: perform_search(self.watch_search_lineEdit.text(), self.watch_table)
-        self.employees_main_search_img.mousePressEvent = lambda x: perform_search(self.employees_main_search_lineEdit.text(), self.employees_main_table)
+        self.items_main_search_img.mousePressEvent = lambda x: perform_search(self.items_main_search_lineEdit.text(),
+                                                                              self.items_main_table)
+        self.stock_main_searchImg.mousePressEvent = lambda x: perform_search(self.stock_main_lineEdit.text(),
+                                                                             self.stock_main_table)
+        self.orders_main_search_img.mousePressEvent = lambda x: perform_search(self.orders_main_search_lineEdit.text(),
+                                                                               self.orders_main_table)
+        self.returns_main_search_img.mousePressEvent = lambda x: perform_search(
+            self.returns_main_search_lineEdit.text(), self.returns_main_table)
+        self.getStocks_main_searchImg.mousePressEvent = lambda x: perform_search(
+            self.getStocks_main_search_lineEdit.text(), self.getStocks_main_table)
+        self.writeOffs_main_searchImg.mousePressEvent = lambda x: perform_search(self.writeOffs_main_search.text(),
+                                                                                 self.writeOffs_main_table)
+        self.watch_search_img.mousePressEvent = lambda x: perform_search(self.watch_search_lineEdit.text(),
+                                                                         self.watch_table)
+        self.employees_main_search_img.mousePressEvent = lambda x: perform_search(
+            self.employees_main_search_lineEdit.text(), self.employees_main_table)
 
         # Items
         self.items_main_add_image.mousePressEvent = self.setItemsCreatePage
@@ -893,21 +962,73 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     # Items
     def setItemsMainPage(self, event):
         self.items_stackedWidget.setCurrentIndex(0)
+
     def setItemsCreatePage(self, event):
         self.items_create_header.setText('Добавление товара')
         self.items_create_fieldItem_lineEdit.setText('')
         self.items_create_descr_textEdit.setText('')
-        self.items_create_category_comboBox.setCurrentText('Не выбран')
-        self.items_create_manufact_comboBox.setCurrentText('Не выбран')
+        self.items_create_category_comboBox.setCurrentText('Не выбрано')
+        self.items_create_manufact_comboBox.setCurrentText('Не выбрано')
         self.items_create_edizm_ComboBox.setCurrentText('Шт')
         self.items_create_price_lineEdit.setText('0')
         self.items_stackedWidget.setCurrentIndex(1)
+
     def itemsCreateClose(self):
         self.items_stackedWidget.setCurrentIndex(0)
+
     def itemsCreateSave(self):
+        try:
+            if self.itemsCurrentRow is not None:
+                result = updateItem(
+                    id=self.itemsData[self.itemsCurrentRow]['id'],
+                    name=self.items_create_fieldItem_lineEdit.text(),
+                    description=self.items_create_descr_textEdit.toPlainText(),
+                    category=findCategoryByName(self.items_create_category_comboBox.currentText()),
+                    manufacturer=findManufacturerByName(self.items_create_manufact_comboBox.currentText()),
+                    unit=findUnitByName(self.items_create_edizm_ComboBox.currentText()),
+                    price=self.items_create_price_lineEdit.text()
+                )
+                if type(result) == int:
+                    createNewLog('Редактирование товара', self.currentUser)
+                    self.drawItemsTable()
+                    self.drawStockTable()
+                    self.drawWatchTable()
+            else:
+                result = createItem(
+                    name=self.items_create_fieldItem_lineEdit.text(),
+                    description=self.items_create_descr_textEdit.toPlainText(),
+                    category=findCategoryByName(self.items_create_category_comboBox.currentText()),
+                    manufacturer=findManufacturerByName(self.items_create_manufact_comboBox.currentText()),
+                    unit=findUnitByName(self.items_create_edizm_ComboBox.currentText()),
+                    price=self.items_create_price_lineEdit.text()
+                )
+                if type(result) == type(Items()):
+                    createNewLog('Создание товара', self.currentUser)
+                    self.drawItemsTable()
+                    self.drawStockTable()
+                    self.drawWatchTable()
+        except peewee.IntegrityError as Er:
+            print(Er)
+        except ValueError as Er:
+            print(Er)
+        except Exception as Ex:
+            print(Ex)
+
         self.items_stackedWidget.setCurrentIndex(0)
+
     def itemsCreateDelete(self, event):
+        item_id = self.itemsData[self.itemsCurrentRow]['id']
+        try:
+            result = deleteItem(item_id)
+            if result is None:
+                createNewLog('Удаление товара', self.currentUser)
+                self.drawItemsTable()
+                self.drawStockTable()
+                self.drawWatchTable()
+        except Exception as Ex:
+            print(Ex)
         self.items_stackedWidget.setCurrentIndex(0)
+
     def setUpItemsCreatePage(self):
         row = self.itemsData[self.itemsCurrentRow]
         self.items_create_header.setText('Редактирование товара')
@@ -922,47 +1043,163 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     # Sells
     def setStockMainPage(self, event):
         self.stock_stackedWidget.setCurrentIndex(0)
+
     def setStockCreatePage(self, event):
+        ids = []
+        for i, child in enumerate(self.stock_create_scrollAreaWidgetContents.findChildren(QWidget)):
+            if child.objectName().startswith("stock_create_table_name_lineEdit"):
+                ids.append(Items.get(Items.name == child.text()).id)
+            if child.objectName().startswith("orders_create_item1_insys"):
+                child.setText(Items.get(Items.id == ids[-1]).amount)
+            if child.objectName().startswith("stock_create_fact"):
+                child.setValue(Items.get(Items.id == ids[-1]).amount)
+            if child.objectName().startswith("stock_create_writeOff"):
+                child.setValue(0)
         self.stock_stackedWidget.setCurrentIndex(1)
+
     def stockCreateClose(self):
         self.stock_stackedWidget.setCurrentIndex(0)
+
     def stockCreateSave(self):
+        items = []
+        ids = []
+        currentAmounts = []
+        factAmounts = []
+        writeOffAmounts = []
+
+        for i, child in enumerate(self.stock_create_scrollAreaWidgetContents.findChildren(QWidget)):
+            if child.objectName().startswith("stock_create_table_name_lineEdit"):
+                ids.append(Items.get(Items.name == child.text()))
+            if child.objectName().startswith("stock_create_table_item1_insys"):
+                currentAmounts.append(child.text())
+            if child.objectName().startswith("stock_create_fact"):
+                factAmounts.append(child.value())
+            if child.objectName().startswith("stock_create_writeOff"):
+                writeOffAmounts.append(child.value())
+        for i in range(len(currentAmounts)):
+            items.append(
+                {
+                    'id': ids[i].id,
+                    'currentAmount': currentAmounts[i],
+                    'factAmount': factAmounts[i],
+                    'writeOffAmount': writeOffAmounts[i]
+                }
+            )
+
+        if createInventory(items) == 0:
+            createNewLog('Проведение инвентаризации', self.currentUser)
+            self.drawStockTable()
+            self.drawWatchTable()
+
+        pixmap = QPixmap(self.stock_create_scrollAreaWidgetContents.size())
+        self.stock_create_scrollAreaWidgetContents.render(pixmap)
+
+        img_path = 'temp.png'
+        pixmap.save(img_path)
+
+        c = canvas.Canvas("Инвентаризация " + str(datetime.now()), pagesize=(pixmap.width(), pixmap.height()))
+        img = Image(img_path)
+        img.drawHeight = 2000
+        img.drawWidth = 1400
+        c.drawImage(img_path, 0, 0)
+        c.showPage()
+        c.save()
+
         self.stock_stackedWidget.setCurrentIndex(0)
+
     def stockCreateDelete(self, event):
         self.stock_stackedWidget.setCurrentIndex(0)
 
     def setOrdersMainPage(self, event):
         self.orders_stackedWidget.setCurrentIndex(0)
+
     def setOrdersCreatePage(self, event):
         self.ordersCurrentRow = None
         self.orders_create_header.setText('Создание заказа')
         self.orders_create_login_lineEdit.setText('')
         self.orders_create_status_combobox.setCurrentText('Создан')
-        self.clearOrdersInCreationPage()
-        self.showOrdersList([])
-        self.showNewItemCreationInOrderPage()
-        self.orders_create_table_manufac.setText('')
-        self.orders_create_table_insys.setText('')
-        self.orders_create_inorder.setText('')
+        # self.clearOrdersInCreationPage()
+        self.showOrdersList(fetchItems())
+        # self.orders_create_inorder.setText('')
         self.orders_stackedWidget.setCurrentIndex(1)
+
     def ordersCreateClose(self, event):
         self.orders_stackedWidget.setCurrentIndex(0)
+
     def ordersCreateDelete(self, event):
         self.orders_stackedWidget.setCurrentIndex(0)
+
     def ordersCreateSave(self, event):
+        try:
+            items = []
+            inOrders = []
+            ids = []
+            amounts = []
+
+            for i, child in enumerate(self.orders_create_scrollAreaWidgetContents.findChildren(QWidget)):
+                if child.objectName().startswith("orders_create_table_checkbox"):
+                    inOrders.append(child.isChecked())
+                if child.objectName().startswith("orders_create_table_name_lineEdit"):
+                    ids.append(Items.get(Items.name == child.text()))
+                if child.objectName().startswith("orders_create_writeOff"):
+                    amounts.append(child.value())
+            for i in range(len(amounts)):
+                if inOrders[i]:
+                    items.append(
+                        {
+                            'id': ids[i].id,
+                            'amount': amounts[i]
+                        }
+                    )
+
+            result = createOrder(
+                address=self.orders_create_login_lineEdit.text(),
+                status=Statuses.get(Statuses.name == self.orders_create_status_combobox.currentText()).id,
+                items=items
+            )
+
+            if result == 0:
+                createNewLog('Создание заказа', self.currentUser)
+                self.drawOrdersTable()
+                self.drawStockTable()
+                self.drawWatchTable()
+
+            self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
+        except Exception as Ex:
+            print(Ex)
+
         self.orders_stackedWidget.setCurrentIndex(0)
+
     def setUpOrdersCreatePage(self):
-        self.clearOrdersInCreationPage()
         row = self.ordersData[self.ordersCurrentRow]
+        self.clearOrdersInCreationPage()
+        self.showOrdersList(fetchItems())
         self.orders_create_header.setText('Заказ ' + str(row['id']))
         self.orders_create_login_lineEdit.setText(row['address'])
         self.orders_create_status_combobox.setCurrentText(row['status'])
-        self.showOrdersList(row['items'])
-        self.showNewItemCreationInOrderPage()
+
+        def inOrder(id):
+            items = ItemsInOrders.select().where(ItemsInOrders.order == row['id'])
+            for item in items:
+                if item.item == id:
+                    return True
+            return False
+
+        counter = 0
+        for i, child in enumerate(self.orders_create_scrollAreaWidgetContents.findChildren(QWidget)):
+            if child.objectName().startswith("orders_create_table_checkbox"):
+                print(child.objectName())
+                counter += 1
+            # if child.objectName().startswith("orders_create_table_name_lineEdit"):
+            #     ids.append(Items.get(Items.name == child.text()))
+            # if child.objectName().startswith("orders_create_writeOff"):
+            #     amounts.append(child.value())
+        print(counter)
         self.orders_stackedWidget.setCurrentIndex(1)
 
     def setReturnsMainPage(self, event):
         self.returns_stackedWidget.setCurrentIndex(0)
+
     def setReturnsCreatePage(self, event):
         self.returns_create_order_lineEdit.setEnabled(True)
         self.returnsCurrentRow = None
@@ -979,12 +1216,16 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.returns_create_inorder.setText("")
         self.returns_create_return.setText("")
         self.returns_stackedWidget.setCurrentIndex(1)
+
     def returnsCreateClose(self):
         self.returns_stackedWidget.setCurrentIndex(0)
+
     def returnsCreateDelete(self, event):
         self.returns_stackedWidget.setCurrentIndex(0)
+
     def returnsCreateSave(self):
         self.returns_stackedWidget.setCurrentIndex(0)
+
     def setUpReturnsPage(self):
         self.returns_create_order_lineEdit.setEnabled(False)
         self.clearReturnsCreatePage()
@@ -993,6 +1234,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
     def setGetStocksMainPage(self, event):
         self.getStocks_stackedWidget.setCurrentIndex(0)
+
     def setGetStocksCreatePage(self, event):
         self.getStocksCurrentRow = None
         self.clearGetStocksInCreationPage()
@@ -1000,12 +1242,16 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.showItemCreationInGetStocksPage()
         self.getStocks_create_header.setText('Новое оприходвание')
         self.getStocks_stackedWidget.setCurrentIndex(1)
+
     def getStocksCreateClose(self):
         self.getStocks_stackedWidget.setCurrentIndex(0)
+
     def getStocksCreateDelete(self):
         self.getStocks_stackedWidget.setCurrentIndex(0)
+
     def getStocksCreateSave(self):
         self.getStocks_stackedWidget.setCurrentIndex(0)
+
     def setUpGetStocksCreatePage(self):
         self.clearGetStocksInCreationPage()
         self.showListOfGetStocks(self.getStocksData[self.getStocksCurrentRow]['items'])
@@ -1013,8 +1259,10 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.getStocks_create_header.setText('Оприходование ' + str(self.getStocksData[self.getStocksCurrentRow]['id']))
         self.getStocks_stackedWidget.setCurrentIndex(1)
 
+    # WriteOffs
     def setWriteOffsMainPage(self, event):
         self.writeOffs_stackedWidget.setCurrentIndex(0)
+
     def setWriteOffsCreatePage(self, event):
         self.writeOffsCurrentRow = None
         self.page_header_6.setText('Новое списание')
@@ -1022,23 +1270,72 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.writeOff_create_manufac_lineEdit.setText('')
         self.writeOff_create_amount_spinbox.setValue(0)
         self.writeOffs_stackedWidget.setCurrentIndex(1)
+
     def writeOffsCreateClose(self, event):
         self.writeOffs_stackedWidget.setCurrentIndex(0)
+
     def writeOffsCreateDelete(self, event):
+        writeOff_id = self.writeOffsData[self.writeOffsCurrentRow]['id']
+        try:
+            result = deleteWriteOff(writeOff_id)
+            if result == 1:
+                createNewLog('Удаление списания', self.currentUser)
+                self.drawWriteOffsTable()
+                self.drawWatchTable()
+                self.drawStockTable()
+        except Exception as Ex:
+            print('here')
+            print(Ex)
         self.writeOffs_stackedWidget.setCurrentIndex(0)
+
     def writeOffsCreateSave(self, event):
+        try:
+            if self.writeOffsCurrentRow is not None:
+                result = updateWriteOff(
+                    id=self.writeOffsData[self.writeOffsCurrentRow]['id'],
+                    item=self.writeOff_create_item_lineEdit.text(),
+                    cause=self.writeOff_create_cause_comboBox.currentText(),
+                    amount=self.writeOff_create_amount_spinbox.value()
+                )
+                if type(result) == int:
+                    createNewLog('Редактирование списания', self.currentUser)
+                    self.drawWriteOffsTable()
+                    self.drawStockTable()
+                    self.drawWatchTable()
+                    self.writeOffs_main_table.itemDoubleClicked.connect(self.setUpWrireOffsCreatePage)
+            else:
+                result = createWriteOff(
+                    item=self.writeOff_create_item_lineEdit.text(),
+                    cause=self.writeOff_create_cause_comboBox.currentText(),
+                    amount=self.writeOff_create_amount_spinbox.value()
+                )
+                if type(result) == type(WriteOffs()):
+                    createNewLog('Создание списания', self.currentUser)
+                    self.drawWriteOffsTable()
+                    self.drawStockTable()
+                    self.drawWatchTable()
+                    self.writeOffs_main_table.itemDoubleClicked.connect(self.setUpWrireOffsCreatePage)
+        except peewee.IntegrityError as Er:
+            print(Er)
+        except ValueError as Er:
+            print(Er)
+        except Exception as Ex:
+            print(Ex)
         self.writeOffs_stackedWidget.setCurrentIndex(0)
+
     def setUpWrireOffsCreatePage(self):
         currentElement = self.writeOffsData[self.writeOffsCurrentRow]
         self.page_header_6.setText('Списание ' + str(currentElement['id']))
-        self.writeOff_create_cause_comboBox.setText(currentElement['cause'])
+        self.writeOff_create_cause_comboBox.setCurrentText(currentElement['cause'])
         self.writeOff_create_item_lineEdit.setText(currentElement['itemName'])
         self.writeOff_create_manufac_lineEdit.setText(currentElement['manufacturer'])
-        self.writeOff_create_amount_spinbox.setValue(currentElement['amount'])
+        self.writeOff_create_amount_spinbox.setValue(int(currentElement['amount']))
         self.writeOffs_stackedWidget.setCurrentIndex(1)
+    # End WriteOffs
 
     def setEmployeesMainPage(self, event):
         self.employees_stackedWidget.setCurrentIndex(0)
+
     def setEmployeesCreatePage(self, event):
         self.itemsCurrentRow = None
         self.employeesCurrentRow = None
@@ -1053,12 +1350,55 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_create_sex_female.setChecked(False)
         self.employees_create_header.setText("Добавление сотрудника")
         self.employees_stackedWidget.setCurrentIndex(1)
+
     def employeesCreateClose(self, event):
         self.employees_stackedWidget.setCurrentIndex(0)
+
     def employeesCreateDelete(self, event):
+        if deleteEmployee(self.employeesData[self.employeesCurrentRow]['id']) == 1:
+            createNewLog("Удаление сотрудника", self.currentUser)
+            self.drawEmployeesTable()
+            self.drawWatchTable()
         self.employees_stackedWidget.setCurrentIndex(0)
+
     def employeesCreateSave(self, event):
+        try:
+            if self.employeesCurrentRow is not None:
+                result = updateEmployee(
+                    id=self.employeesData[self.employeesCurrentRow]['id'],
+                    surname=self.employees_create_surname_lineEdit.text(),
+                    name=self.employees_create_name_lineEdit.text(),
+                    patronymic=self.employees_create_patronymic_lineedit.text(),
+                    role=self.employees_create_role_combobox.currentText(),
+                    number=self.employees_create_number_lineedit.text(),
+                    username=self.employees_create_user_lineedit.text(),
+                    password=self.employees_create_password_lineedit.text()
+                )
+                if type(result) == int:
+                    createNewLog('Редактирование сотрудника', self.currentUser)
+                    self.drawEmployeesTable()
+                    self.employees_main_table.itemDoubleClicked.connect(self.setUpEmployeesCreatePage)
+                    self.drawWatchTable()
+            else:
+                result = createEmployee(
+                    surname=self.employees_create_surname_lineEdit.text(),
+                    name=self.employees_create_name_lineEdit.text(),
+                    patronymic=self.employees_create_patronymic_lineedit.text(),
+                    role=self.employees_create_role_combobox.currentText(),
+                    number=self.employees_create_number_lineedit.text(),
+                    username=self.employees_create_user_lineedit.text(),
+                    password=self.employees_create_password_lineedit.text()
+                )
+                if type(result) == type(Users()):
+                    createNewLog('Добавление сотрудника', self.currentUser)
+                    self.drawEmployeesTable()
+                    self.employees_main_table.itemDoubleClicked.connect(self.setUpEmployeesCreatePage)
+                    self.drawWatchTable()
+        except Exception as Ex:
+            print(Ex)
+
         self.employees_stackedWidget.setCurrentIndex(0)
+
     def setUpEmployeesCreatePage(self):
         row = self.employeesData[self.employeesCurrentRow]
         self.employees_create_surname_lineEdit.setText(row['surname'])
@@ -1083,20 +1423,6 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         WriteOffsPage.retranslateUi(self)
 
         self.items_main_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
-        item = self.items_main_table.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Код товара"))
-        item = self.items_main_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Название"))
-        item = self.items_main_table.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Производитель"))
-        item = self.items_main_table.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Категория"))
-        item = self.items_main_table.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Описание"))
-        item = self.items_main_table.horizontalHeaderItem(5)
-        item.setText(_translate("MainWindow", "Ед. изм."))
-        item = self.items_main_table.horizontalHeaderItem(6)
-        item.setText(_translate("MainWindow", "Цена"))
         self.items_create_header.setText(_translate("MainWindow", "Добавление товара"))
         self.items_create_fieldItemHeader.setText(_translate("MainWindow", "Наименование товара"))
         self.items_create_fieldItem_lineEdit.setPlaceholderText(_translate("MainWindow", "Введите наименование товара"))
@@ -1125,27 +1451,6 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.main_tab.setTabText(self.main_tab.indexOf(self.sells), _translate("MainWindow", "Продажи"))
 
         self.watch_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
-        item = self.watch_table.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Код изменения"))
-        item = self.watch_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Действие"))
-        item = self.watch_table.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Сотрудник"))
-        item = self.watch_table.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Дата и время"))
-        self.main_tab.setTabText(self.main_tab.indexOf(self.watch), _translate("MainWindow", "Отслеживание"))
-        item = self.employees_main_table.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Код сотрудника"))
-        item = self.employees_main_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Фамилия"))
-        item = self.employees_main_table.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Имя"))
-        item = self.employees_main_table.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Отчество"))
-        item = self.employees_main_table.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Роль"))
-        item = self.employees_main_table.horizontalHeaderItem(5)
-        item.setText(_translate("MainWindow", "Номер"))
         self.employees_main_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
         self.employees_create_header.setText(_translate("MainWindow", "Добавление сотрудника"))
         self.employees_create_save.setText(_translate("MainWindow", "СОХРАНИТЬ"))
@@ -1169,4 +1474,3 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_create_sex_male.setText(_translate("MainWindow", "(Мужчина)"))
         self.employees_create_sex.setText(_translate("MainWindow", "Пол"))
         self.employees_create_sex_female.setText(_translate("MainWindow", "(Женщина)"))
-        self.main_tab.setTabText(self.main_tab.indexOf(self.employees), _translate("MainWindow", "Сотрудники"))

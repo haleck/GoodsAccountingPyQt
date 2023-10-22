@@ -1,7 +1,43 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QLabel
+
+from Tables import Users, Roles
 
 
 class LoginPage(object):
+    def showPopUp(self, text):
+        dialog = QDialog()
+        dialog.setWindowTitle("Уведомление")
+
+        dialog.setStyleSheet("background-color: rgb(77, 77, 77);")
+
+        label = QLabel(text)
+        label.setStyleSheet("color: rgb(255, 255, 255);")
+        label.setAlignment(Qt.AlignCenter)
+
+        button = QPushButton("OK")
+        button.setStyleSheet("QPushButton {\n"
+                             "    background-color:rgb(52, 52, 52);\n"
+                             "    border-color: rgb(66, 66, 66);\n"
+                             "    color: rgb(255, 255, 255);\n"
+                             "    border-radius: 8px;    \n"
+                             "    height: 30px; margin-top: 10px;"
+                             "}\n"
+                             "QPushButton:hover {\n"
+                             "    background-color: rgba(255, 255, 255, 0.3);\n"
+                             "    color: rgb(52, 52, 52);\n"
+                             "}")
+
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        layout.addWidget(button)
+
+        dialog.setLayout(layout)
+
+        button.clicked.connect(dialog.accept)
+
+        dialog.exec_()
     def __init__(self):
         self.login_page = QtWidgets.QWidget()
         self.login_page.setObjectName("login_page")
@@ -101,6 +137,25 @@ class LoginPage(object):
                                              "color: rgb(217, 217, 217)")
         self.login_page_header.setAlignment(QtCore.Qt.AlignCenter)
         self.login_page_header.setObjectName("login_page_header")
+
+        self.login_page_btn.clicked.connect(self.setMainPage)
+
+    def setMainPage(self, event):
+        try:
+            user = Users.get(Users.nickname == self.login_page_login_lineedit.text())
+            if user.password != self.login_page_pswrd_lineedit.text():
+                self.showPopUp('Неверный пароль')
+                return
+            else:
+                self.currentUser = user.id
+                self.userRole = Roles.get(Roles.id == user.role).name
+                print(self.userRole)
+                if self.userRole == "Администратор" or self.userRole == 'Директор':
+                    self.addAdminTabs()
+        except Users.DoesNotExist:
+            self.showPopUp('Пользователь не найден')
+            return
+        self.stackedWidget.setCurrentIndex(1)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate

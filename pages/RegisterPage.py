@@ -1,8 +1,46 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QDialog, QLabel, QPushButton, QVBoxLayout
+
+from utils import *
+from setUpDB import *
 
 
 class RegisterPage(object):
+    def showPopUp(self, text):
+        dialog = QDialog()
+        dialog.setWindowTitle("Уведомление")
+
+        dialog.setStyleSheet("background-color: rgb(77, 77, 77);")
+
+        label = QLabel(text)
+        label.setStyleSheet("color: rgb(255, 255, 255);")
+        label.setAlignment(Qt.AlignCenter)
+
+        button = QPushButton("OK")
+        button.setStyleSheet("QPushButton {\n"
+                             "    background-color:rgb(52, 52, 52);\n"
+                             "    border-color: rgb(66, 66, 66);\n"
+                             "    color: rgb(255, 255, 255);\n"
+                             "    border-radius: 8px;    \n"
+                             "    height: 30px; margin-top: 10px;"
+                             "}\n"
+                             "QPushButton:hover {\n"
+                             "    background-color: rgba(255, 255, 255, 0.3);\n"
+                             "    color: rgb(52, 52, 52);\n"
+                             "}")
+
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        layout.addWidget(button)
+
+        dialog.setLayout(layout)
+
+        button.clicked.connect(dialog.accept)
+
+        dialog.exec_()
+
     def __init__(self):
+        self.currentUser = None
         self.register_page_2 = QtWidgets.QWidget()
         self.register_page_2.setObjectName("register_page_2")
         self.register_page_2_back = QtWidgets.QLabel(self.register_page_2)
@@ -101,7 +139,6 @@ class RegisterPage(object):
                                                   "color: rgb(217, 217, 217)")
         self.register_page_2_hedaer.setAlignment(QtCore.Qt.AlignCenter)
         self.register_page_2_hedaer.setObjectName("register_page_2_hedaer")
-
 
         self.register_page_1 = QtWidgets.QWidget()
         self.register_page_1.setObjectName("register_page_1")
@@ -302,8 +339,32 @@ class RegisterPage(object):
         self.register_page_1_header.setAlignment(QtCore.Qt.AlignCenter)
         self.register_page_1_header.setObjectName("register_page_1_header")
 
+        self.register_page_2_btn.clicked.connect(self.registerUser)  # Кнопка регистрации на RegisterPage2
 
-        # Translate
+    def registerUser(self):
+        if len(Users.select()) == 0:
+            result = createEmployee(
+                name=self.register_page_1_name_lineeditr.text(),
+                surname=self.register_page_1_surname_lineedit.text(),
+                patronymic=self.register_page_1_patronymic_lineedit.text(),
+                nickname=self.register_page_2_login_lineedit.text(),
+                password=self.register_page_2_psswrd_lineedit.text(),
+                phoneNumber=self.register_page_1_number_lineedit.text(),
+                role=Roles.get(Roles.name == "Директор")
+            )
+            self.currentUser = result.id
+            if type(result) == type(Users()):
+                setUpUnits()
+                setUpManufacturers()
+                setUpCategories()
+                setUpRoles()
+                setUpStatuses()
+                setUpCausesToReturn()
+                setUpActions()
+                setUpCausesToWriteOff()
+        else:
+            self.showPopUp(
+                'Регистрацию в системе проходит только директор,\n если вы являетесь сотрудником, попросите у \nадминистратора данные для входа в ваш аккаунт')
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate

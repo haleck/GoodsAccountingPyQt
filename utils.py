@@ -1,49 +1,57 @@
+from datetime import datetime
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QCompleter
-from peewee import PostgresqlDatabase, Model, CharField, IntegerField, ForeignKeyField
 
 from Tables import *
 
-db = PostgresqlDatabase('dbb', user='zdiroog', password='password',host='localhost', port=5432)
+db = PostgresqlDatabase('dbb', user='zdiroog', password='password', host='localhost', port=5432)
 
 db.connect()
 db.create_tables([Statuses, Orders, Returns, ItemsInOrders, Items, Categories, Units,
-                 Manufacturers, ItemsInReturns, CausesToReturn, ItemsInInventory, Inventory,
-                 WriteOffs, CausesToWriteOff, ItemsInGetStocks, GetStocks, Users, Roles, LogTable, ActionsTable])
+                  Manufacturers, ItemsInReturns, CausesToReturn, ItemsInInventory, Inventory,
+                  WriteOffs, CausesToWriteOff, ItemsInGetStocks, GetStocks, Users, Roles, LogTable, ActionsTable])
 
-itemsQuery = Items.select()
-for item in itemsQuery:
-    print(item.name)
 
 def fetchCategories():
-    return ["Не выбран", "Название категории 1", "Название категории 2", "Название категории 3"]
+    return [category.name for category in Categories.select()]
+
+
+def findCategoryByName(name: str) -> int:
+    return Categories.select().where(Categories.name == name)[0].id
 
 
 def fetchManufacturers():
-    return ["Не выбран", "Производитель 1", "Производитель 2", "Производитель 3", "Производитель 4",
-            "Производитель 5", ]
+    return [manufacturer.name for manufacturer in Manufacturers.select()]
+
+
+def findManufacturerByName(name: str) -> int:
+    return Manufacturers.select().where(Manufacturers.name == name)[0].id
 
 
 def fetchUnits():
-    return ['Шт', 'Кг', 'Мл', 'Л', 'Грамм']
+    return [unit.name for unit in Units.select()]
+
+
+def findUnitByName(name: str) -> int:
+    return Units.select().where(Units.name == name)[0].id
 
 
 def fetchRoles():
-    return ['Администратор', 'Сотрудник']
+    return [role.name for role in Roles.select()]
 
 
 def fetchStatuses():
-    return ['Создан', 'Принят', 'Собирается', 'Отправлен', 'Принят на складе', 'Передан курьеру', 'Завершен', ]
+    return [status.name for status in Statuses.select()]
 
 
 def fetchCausesToReturn():
-    return ['Нарушена упаковка', "Неполный комплект", "Не тот товар", "Товар поврежден", "Бракованный товар",
-            "Не выбрано"]
+    return [cause.cause for cause in CausesToReturn.select()]
 
 
 def fetchCausesToWriteOff():
-    return ["Не выбрано", "Другое", "Истек срок годности", "Нарушены условия хранения"]
+    return [cause.cause for cause in CausesToWriteOff.select()]
 
 
 def fetchInventActions():
@@ -51,303 +59,183 @@ def fetchInventActions():
 
 
 def fetchItems():
-    # {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-    #          'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-    return itemsQuery
+    items = []
+    for item in Items.select():
+        items.append(
+            {
+                'id': item.id,
+                'name': item.name,
+                "category": Categories.get(Categories.id == item.category).name,
+                'unit': Units.get(Units.id == item.unit).name,
+                'price': item.price,
+                'description': item.description,
+                'manufacturer': Manufacturers.get(Manufacturers.id == item.manufacturer).name,
+                'amount': item.amount
+            }
+        )
+    return items
+
+
+def createItem(name='', price=0, description='', amount=0, category=None, unit=None, manufacturer=None):
+    if name.isspace():
+        raise Exception('Пустое название')
+    if amount < 0:
+        raise Exception('Значение количества ниже нуля')
+    if int(price) < 0:
+        raise Exception('Значение цены ниже нуля')
+    return Items.create(
+        name=name,
+        price=price,
+        description=description,
+        amount=amount,
+        category=category,
+        unit=unit,
+        manufacturer=manufacturer
+    )
+
+
+def updateItem(id, name=None, price=0, description='', amount=0, category=None, unit=None, manufacturer=None):
+    if name.isspace():
+        raise Exception('Пустое название')
+    if amount < 0:
+        raise Exception('Значение количества ниже нуля')
+    if int(price) < 0:
+        raise Exception('Значение цены ниже нуля')
+    item = Items.get(Items.id == id)
+    item.name = name
+    item.price = price
+    item.description = description
+    item.amount = amount
+    item.category = category
+    item.unit = unit
+    item.manufacturer = manufacturer
+    return item.save()
+
+
+def deleteItem(id):
+    item = Items.get(Items.id == id)
+    item.delete_instance()
 
 
 def fetchActions():
-    return [
-        {'id': 1, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 16:30'},
-        {'id': 2, 'action': 'Удаление товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '23.06.2023 18:40'},
-        {'id': 3, 'action': 'Проведение инвентаризации', 'employee': 'Haleckiy Denis Aleksandrovich',
-         'date': '23.06.2023 19:10'},
-        {'id': 4, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '24.06.2023 10:00'},
-        {'id': 5, 'action': 'Создание оприходования', 'employee': 'Haleckiy Denis Aleksandrovich',
-         'date': '24.06.2023 12:12'},
-        {'id': 6, 'action': 'Удаление товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 09:30'},
-        {'id': 7, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '25.06.2023 16:30'},
-        {'id': 8, 'action': 'Редактирование товара', 'employee': 'Haleckiy Denis Aleksandrovich',
-         'date': '25.06.2023 16:35'},
-        {'id': 9, 'action': 'Создание товара', 'employee': 'Haleckiy Denis Aleksandrovich', 'date': '26.06.2023 19:00'},
-    ]
+    actions = []
+    for action in LogTable.select():
+        user = Users.get(Users.id == action.user)
+        actions.append(
+            {
+                'id': action.id,
+                'action': ActionsTable.get(ActionsTable.id == action.action).action,
+                'employee': user.surname + " " + user.name + " " + user.patronymic if user.patronymic else user.surname + " " + user.name,
+                'date': action.dateAndTime
+            }
+        )
+    return actions
+
+
+def findActionByDescription(description):
+    return ActionsTable.select().where(ActionsTable.action == description)[0].id
+
+
+def createNewLog(action=None, employee=None):
+    if not action:
+        raise Exception("Не указано действие для записи в журнал")
+    action_id = findActionByDescription(action)
+    return LogTable.create(
+        action=action_id,
+        user=employee,
+        dateAndTime=datetime.now()
+    )
 
 
 def fetchEmployees():
-    return [
-        {'id': 1, 'surname': 'Haleckiy', 'name': 'Denis', 'patronymic': 'Aleksandrovich', 'role': 'Администратор',
-         'number': '+79994006577', 'sex': 'male', 'username': 'Haleck991', 'password': 'SuperSecretPassword123'},
-        {'id': 2, 'surname': 'Petronv', 'name': 'Anton', 'patronymic': 'Urievich', 'role': 'Сотрудник',
-         'number': '+79294506577', 'sex': 'male', 'username': 'Petrov123', 'password': 'SecretPasswordPetrovv'},
-        {'id': 3, 'surname': 'Ivanov', 'name': 'Semen', 'patronymic': 'Ivanovich', 'role': 'Сотрудник',
-         'number': '+79794006554', 'sex': 'male', 'username': 'IvanovSemenIv', 'password': 'passIvanovSemen'},
-        {'id': 4, 'surname': 'Sidorov', 'name': 'Vladislav', 'patronymic': 'Vladimirovich', 'role': 'Сотрудник',
-         'number': '+79934006577', 'sex': 'male', 'username': 'SidorovVlad', 'password': 'vladPassSd'},
-        {'id': 5, 'surname': 'Malcev', 'name': 'Roman', 'patronymic': 'Vladislavovich', 'role': 'Администратор',
-         'number': '+79594916577', 'sex': 'male', 'username': 'Roman1222', 'password': 'RomanPass233'},
-    ]
+    users = []
+    for user in Users.select():
+        users.append(
+            {
+                'id': user.id,
+                "surname": user.surname,
+                "name": user.name,
+                "patronymic": user.patronymic,
+                'role': user.role.name,
+                'number': user.phoneNumber,
+                'sex': 1,
+                'username': user.nickname,
+                "password": user.password
+            }
+        )
+    return users
 
 
-def fetchStock():
-    return [
-        {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1, 'reserved': 1},
-        {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2, 'reserved': 1},
-        {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1, 'reserved': 1},
-        {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3, 'reserved': 2},
-        {'id': 5, 'name': 'Название товара 5', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 5', 'manufacturer': 'Производитель 2', 'amount': 1, 'reserved': 1},
-        {'id': 6, 'name': 'Название товара 6', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 6', 'manufacturer': 'Производитель 3', 'amount': 5, 'reserved': 3},
-        {'id': 7, 'name': 'Название товара 7', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 7', 'manufacturer': 'Производитель 3', 'amount': 1, 'reserved': 1},
-        {'id': 8, 'name': 'Название товара 8', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 8', 'manufacturer': 'Производитель 4', 'amount': 10, 'reserved': 7},
-        {'id': 9, 'name': 'Название товара 9', 'category': 'Название категории 3', 'unit': 'Шт.', 'price': 123,
-         'description': 'Описание товара 9', 'manufacturer': 'Производитель 5', 'amount': 8, 'reserved': 2},
-    ]
+def createEmployee(surname=None, name=None, patronymic='', role='Сотрудник', number="", username=None, password=None):
+    if surname.isspace():
+        raise Exception('Поле фамилии не должно быть пустой строкой')
+    if name.isspace():
+        raise Exception('Поле имени не должно быть пустой строкой')
+    if username.isspace():
+        raise Exception('Поле username не должно быть пустой строкой')
+    if password.isspace():
+        raise Exception('Поле пароля не должно быть пустой строкой')
+    return Users.create(
+        name=name,
+        surname=surname,
+        patronymic=patronymic,
+        nickname=username,
+        password=password,
+        phoneNumber=number,
+        role=Roles.get(Roles.name == role)
+    )
 
+
+def updateEmployee(id, surname=None, name=None, patronymic='', role='Сотрудник', number="", username=None,
+                   password=None):
+    if surname.isspace():
+        raise Exception('Поле фамилии не должно быть пустой строкой')
+    if name.isspace():
+        raise Exception('Поле имени не должно быть пустой строкой')
+    if username.isspace():
+        raise Exception('Поле username не должно быть пустой строкой')
+    if password.isspace():
+        raise Exception('Поле пароля не должно быть пустой строкой')
+    role_id = Roles.get(Roles.name == role).id
+    user = Users.get(Users.id == id)
+    user.surname = surname
+    user.name = name
+    user.patronymic = patronymic
+    user.role=role_id
+    user.phoneNumber = number
+    user.nickname = username
+    user.password = password
+    return user.save()
+
+
+def deleteEmployee(id):
+    return Users.delete_instance(Users.get(Users.id == id))
 
 def fetchOrders():
-    return [
-        {'id': 1, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '24.09.2023',
-         'items': [
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-         ]},
-        {'id': 2, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '25.09.2023',
-         'items': [
-             {'id': 1, 'name': '1Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': '1Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': '1Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': '1Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': '1Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': '1Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': '1Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': '1Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': '1Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': '1Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': '1Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': '1Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': '1Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-             {'id': 2, 'name': '1Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': '1Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': '1Название товара 10', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-         ]},
-        {'id': 3, 'status': 'Принят', 'address': 'a long long address line 4 ex. 12322', 'date': '24.11.2023',
-         'items': []},
-        {'id': 4, 'status': 'Собирается', 'address': 'a long long address line 4 ex. 12322', 'date': '25.11.2023',
-         'items': []},
-        {'id': 5, 'status': 'Завершен', 'address': 'a long long address line 4 ex. 12322', 'date': '26.11.2023',
-         'items': []},
-        {'id': 6, 'status': 'Передан курьеру', 'address': 'a long long address line 4 ex. 12322', 'date': '29.11.2023',
-         'items': []},
-        {'id': 7, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '24.09.2023',
-         'items': [
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-         ]},
-        {'id': 8, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '25.09.2023',
-         'items': []},
-        {'id': 9, 'status': 'Принят', 'address': 'a long long address line 4 ex. 12322', 'date': '24.11.2023',
-         'items': []},
-        {'id': 10, 'status': 'Собирается', 'address': 'a long long address line 4 ex. 12322', 'date': '25.11.2023',
-         'items': []},
-        {'id': 11, 'status': 'Завершен', 'address': 'a long long address line 4 ex. 12322', 'date': '26.11.2023',
-         'items': []},
-        {'id': 12, 'status': 'Передан курьеру', 'address': 'a long long address line 4 ex. 12322', 'date': '29.11.2023',
-         'items': []},
-        {'id': 13, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '24.09.2023',
-         'items': [
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-         ]},
-        {'id': 14, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '25.09.2023',
-         'items': []},
-        {'id': 15, 'status': 'Принят', 'address': 'a long long address line 4 ex. 12322', 'date': '24.11.2023',
-         'items': []},
-        {'id': 16, 'status': 'Собирается', 'address': 'a long long address line 4 ex. 12322', 'date': '25.11.2023',
-         'items': []},
-        {'id': 17, 'status': 'Завершен', 'address': 'a long long address line 4 ex. 12322', 'date': '26.11.2023',
-         'items': []},
-        {'id': 18, 'status': 'Передан курьеру', 'address': 'a long long address line 4 ex. 12322', 'date': '29.11.2023',
-         'items': []},
-        {'id': 19, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '24.09.2023',
-         'items': [
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-         ]},
-        {'id': 20, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '25.09.2023',
-         'items': []},
-        {'id': 21, 'status': 'Принят', 'address': 'a long long address line 4 ex. 12322', 'date': '24.11.2023',
-         'items': []},
-        {'id': 22, 'status': 'Собирается', 'address': 'a long long address line 4 ex. 12322', 'date': '25.11.2023',
-         'items': []},
-        {'id': 23, 'status': 'Завершен', 'address': 'a long long address line 4 ex. 12322', 'date': '26.11.2023',
-         'items': []},
-        {'id': 24, 'status': 'Передан курьеру', 'address': 'a long long address line 4 ex. 12322', 'date': '29.11.2023',
-         'items': []},
-        {'id': 25, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '24.09.2023',
-         'items': [
-             {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-             {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-             {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-             {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-              'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-         ]},
-        {'id': 26, 'status': 'Создан', 'address': 'a long long address line 4 ex. 12322', 'date': '25.09.2023',
-         'items': []},
-        {'id': 27, 'status': 'Принят', 'address': 'a long long address line 4 ex. 12322', 'date': '24.11.2023',
-         'items': []},
-        {'id': 28, 'status': 'Собирается', 'address': 'a long long address line 4 ex. 12322', 'date': '25.11.2023',
-         'items': []},
-        {'id': 29, 'status': 'Завершен', 'address': 'a long long address line 4 ex. 12322', 'date': '26.11.2023',
-         'items': []},
-        {'id': 30, 'status': 'Передан курьеру', 'address': 'a long long address line 4 ex. 12322', 'date': '29.11.2023',
-         'items': []},
-    ]
+    orders = []
+    for order in Orders.select():
+        orderItems = ItemsInOrders.select().where(ItemsInOrders.order == order.id)
+        orders.append(
+            {
+                'id': order.id,
+                'status': order.status.name,
+                'address': order.address,
+                'date': order.dateAndTime,
+                'items': orderItems
+            }
+        )
+    return orders
+
+
+def createOrder(address="", status="", items=[]):
+    order = Orders.create(address=address, status=status, dateAndTime=datetime.now())
+    for item in items:
+        ItemsInOrders.create(
+            item=item['id'],
+            order=order.id,
+            amount=item['amount'],
+        )
+    return 0
 
 
 def fetchReturns():
@@ -367,85 +255,107 @@ def getItemsByOrderId(id: str):
 
 
 def fetchGetStocks():
+    # writeOffs = []
+    # for writeOff in WriteOffs.select():
+    #     writeOffs.append(
+    #         {
+    #             'id': writeOff.id,
+    #             'date': writeOff.dateAndTime,
+    #             'itemName': writeOff.item.name,
+    #             'amount': str(writeOff.amount),
+    #             'cause': writeOff.cause.cause,
+    #             'manufacturer': writeOff.item.manufacturer.name
+    #         }
+    #     )
+    # return writeOffs
     return [
         {'id': 1, 'date': '23.06.2023', 'time': '20:10', 'items': [
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-            {'id': 1, 'name': 'Название товара 1', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 1', 'manufacturer': 'Производитель 1', 'amount': 1},
-            {'id': 2, 'name': 'Название товара 2', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 2', 'manufacturer': 'Производитель 1', 'amount': 2},
-            {'id': 3, 'name': 'Название товара 3', 'category': 'Название категории 1', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 3', 'manufacturer': 'Производитель 2', 'amount': 1},
-            {'id': 4, 'name': 'Название товара 4', 'category': 'Название категории 2', 'unit': 'Шт.', 'price': 123,
-             'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3},
-        ]},
-        {'id': 2, 'date': '23.06.2023', 'time': '20:15', 'items': []},
-        {'id': 3, 'date': '24.06.2023', 'time': '15:40', 'items': []},
-        {'id': 4, 'date': '24.06.2023', 'time': '16:30', 'items': []},
-        {'id': 5, 'date': '24.06.2023', 'time': '16:40', 'items': []},
+            {'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3}
+        ]}
     ]
+    # getStocks = []
+    # for getStock in GetStocks.select():
+    #     [date, time] = getStock.dateAndTime.split(' ')
+    #     getStocks.append(
+    #         {
+    #             'id': getStock.id,
+    #             'date': date,
+    #             'time': time,
+    #             'items': [
+    #
+    #             ]
+    #         }
+    #     )
 
 
 def fetchWriteOffs():
-    return [
-        {'id': 1, 'date': '23.06.2023', 'itemName': 'Молоко', 'amount': 2, 'cause': 'Нарушена упаковки',
-         'manufacturer': 'Производитель товара 1'},
-        {'id': 2, 'date': '23.06.2023', 'itemName': 'Кефир', 'amount': 2, 'cause': 'Срок годности',
-         'manufacturer': 'Производитель товара 2'},
-        {'id': 3, 'date': '24.06.2023', 'itemName': 'Сгущенка', 'amount': 2, 'cause': 'Срок годности',
-         'manufacturer': 'Производитель товара 3'},
-        {'id': 4, 'date': '25.06.2023', 'itemName': 'Сыр', 'amount': 2, 'cause': 'Нарушена упаковки',
-         'manufacturer': 'Производитель товара 4'},
-        {'id': 5, 'date': '25.06.2023', 'itemName': 'Торт', 'amount': 1, 'cause': 'Срок годности',
-         'manufacturer': 'Производитель товара 5'},
-    ]
+    writeOffs = []
+    for writeOff in WriteOffs.select():
+        writeOffs.append(
+            {
+                'id': writeOff.id,
+                'date': writeOff.dateAndTime,
+                'itemName': writeOff.item.name,
+                'amount': str(writeOff.amount),
+                'cause': writeOff.cause.cause,
+                'manufacturer': writeOff.item.manufacturer.name
+            }
+        )
+    return writeOffs
+
+
+def createWriteOff(item='', cause='Не выбрана', amount=0):
+    item = Items.get(Items.name == item)
+    cause_id = CausesToWriteOff.get(CausesToWriteOff.cause == cause)
+    if amount < 0:
+        raise Exception("Значение количества ниже нуля")
+    result = WriteOffs.create(
+        item=item.id,
+        cause=cause_id,
+        amount=amount,
+        dateAndTime=str(datetime.now())
+    )
+    item.amount = item.amount - amount
+    item.save()
+    return result
+
+
+def updateWriteOff(id, item='', cause='Не выбрана', amount=0):
+    item = Items.get(Items.name == item)
+    cause_id = CausesToWriteOff.get(CausesToWriteOff.cause == cause)
+    writeOff = WriteOffs.get(WriteOffs.id == id)
+    if amount < 0:
+        raise Exception("Значение количества ниже нуля")
+    previous_amount = writeOff.amount
+    writeOff.item = item.id
+    writeOff.cause = cause_id
+    writeOff.amount = amount
+    item.amount = item.amount + (previous_amount - amount)
+    item.save()
+    return writeOff.save()
+
+
+def deleteWriteOff(id):
+    writeOff = WriteOffs.get(WriteOffs.id == id)
+    writeOff.item.amount = writeOff.item.amount + writeOff.amount
+    writeOff.item.save()
+    return WriteOffs.delete_instance(writeOff)
+
+
+def createInventory(items):
+    inventory_id = Inventory.create(dateAndTime=datetime.now())
+    for item in items:
+        ItemsInInventory.create(
+            currentAmount=item['currentAmount'],
+            factAmount=item['factAmount'],
+            writeOffAmount=item['writeOffAmount'],
+            item=item['id'],
+            inventory=inventory_id
+        )
+        item_ = Items.get(Items.id == item['id'])
+        item_.amount = int(item['factAmount']) - int(item['writeOffAmount'])
+        item_.save()
+    return 0
 
 
 def perform_search(search_query, table):

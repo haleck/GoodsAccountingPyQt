@@ -5,32 +5,114 @@ from PyQt5.QtWidgets import QTableWidgetItem
 from utils import *
 
 class StockPage(object):
-    def __init__(self):
-        self.stock = QtWidgets.QWidget()
-        self.stock.setObjectName("stock")
-        self.stock_stackedWidget = QtWidgets.QStackedWidget(self.stock)
-        self.stock_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
-        self.stock_stackedWidget.setObjectName("stock_stackedWidget")
-        self.stock_main = QtWidgets.QWidget()
-        self.stock_main.setObjectName("stock_main")
+    def showStockList(self, data):
+        for i, item in enumerate(data):
+            self.stock_create_header.setText('Новая инвентаризация')
+            self.stock_create_table_item1 = QtWidgets.QWidget(self.stock_create_scrollAreaWidgetContents)
+            self.stock_create_table_item1.setGeometry(QtCore.QRect(0, 40 * i, 1300, 35))
+            self.stock_create_table_item1.setMinimumSize(QtCore.QSize(0, 0))
+            self.stock_create_table_item1.setObjectName("stock_create_table_item" + str(i))
+            self.stock_create_table_checkbox = QtWidgets.QCheckBox(self.stock_create_table_item1)
 
-        # Start of Stock Table
+            self.stock_create_table_checkbox.setGeometry(QtCore.QRect(0, 0, 35, 35))
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(self.stock_create_table_checkbox.sizePolicy().hasHeightForWidth())
+            self.stock_create_table_checkbox.setSizePolicy(sizePolicy)
+            self.stock_create_table_checkbox.setMinimumSize(QtCore.QSize(0, 0))
+            self.stock_create_table_checkbox.setStyleSheet("QCheckBox::indicator { \n"
+                                                           "    width: 35px; \n"
+                                                           "    height: 35px;\n"
+                                                           "}\n"
+                                                           "QCheckBox {\n"
+                                                           "    background-color: rgb(91, 91, 91);\n"
+                                                           "    border-color: rgb(66, 66, 66);\n"
+                                                           "    border-radius: 6px;\n"
+                                                           "}")
+            self.stock_create_table_checkbox.setText("")
+            self.stock_create_table_checkbox.setIconSize(QtCore.QSize(40, 40))
+            self.stock_create_table_checkbox.setChecked(False)
+            self.stock_create_table_checkbox.setObjectName("stock_create_table_checkbox" + str(i))
 
-        self.stockData = fetchStock()
+            self.stock_create_table_name_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
+            self.stock_create_table_name_lineEdit.setEnabled(False)
+            self.stock_create_table_name_lineEdit.setGeometry(QtCore.QRect(40, 0, 580, 35))
+            self.stock_create_table_name_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
+            font = QtGui.QFont()
+            font.setPointSize(12)
+            self.stock_create_table_name_lineEdit.setFont(font)
+            self.stock_create_table_name_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
+                                                                "border-color: rgb(66, 66, 66);\n"
+                                                                "background-color:rgb(71, 71, 71);\n"
+                                                                "border-radius: 8px;\n"
+                                                                "padding: 5px;")
+            self.stock_create_table_name_lineEdit.setText("")
+            self.stock_create_table_name_lineEdit.setObjectName("stock_create_table_name_lineEdit" + str(i))
+
+            self.stock_create_table_manufac_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
+            self.stock_create_table_manufac_lineEdit.setEnabled(False)
+            self.stock_create_table_manufac_lineEdit.setGeometry(QtCore.QRect(630, 0, 275, 35))
+            self.stock_create_table_manufac_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
+            font = QtGui.QFont()
+            font.setPointSize(12)
+            self.stock_create_table_manufac_lineEdit.setFont(font)
+            self.stock_create_table_manufac_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
+                                                                   "border-color: rgb(66, 66, 66);\n"
+                                                                   "background-color: rgb(71, 71, 71);\n"
+                                                                   "border-radius: 8px;\n"
+                                                                   "padding: 5px;")
+            self.stock_create_table_manufac_lineEdit.setText("")
+            self.stock_create_table_manufac_lineEdit.setObjectName("stock_create_table_manufac_lineEdit" + str(i))
+            self.stock_create_table_item1_insys = QtWidgets.QLineEdit(self.stock_create_table_item1)
+            self.stock_create_table_item1_insys.setEnabled(False)
+            self.stock_create_table_item1_insys.setGeometry(QtCore.QRect(920, 0, 110, 35))
+            self.stock_create_table_item1_insys.setMinimumSize(QtCore.QSize(0, 35))
+            font = QtGui.QFont()
+            font.setPointSize(12)
+            self.stock_create_table_item1_insys.setFont(font)
+            self.stock_create_table_item1_insys.setStyleSheet("color: rgb(217, 217, 217);\n"
+                                                              "border-color: rgb(66, 66, 66);\n"
+                                                              "background-color: rgb(71, 71, 71);\n"
+                                                              "border-radius: 8px;\n"
+                                                              "padding: 5px;")
+            self.stock_create_table_item1_insys.setText("")
+            self.stock_create_table_item1_insys.setAlignment(QtCore.Qt.AlignCenter)
+            self.stock_create_table_item1_insys.setObjectName("stock_create_table_item1_insys" + str(i))
+            self.stock_create_fact = QtWidgets.QSpinBox(self.stock_create_table_item1)
+            self.stock_create_fact.setGeometry(QtCore.QRect(1040, 0, 110, 35))
+            self.stock_create_fact.setStyleSheet("\n"
+                                                 "background-color:rgb(91, 91, 91);\n"
+                                                 "color: rgb(217, 217, 217);\n"
+                                                 "border-color: rgb(66, 66, 66);")
+            self.stock_create_fact.setAlignment(QtCore.Qt.AlignCenter)
+            self.stock_create_fact.setObjectName("stock_create_fact" + str(i))
+            self.stock_create_writeOff_2 = QtWidgets.QSpinBox(self.stock_create_table_item1)
+            self.stock_create_writeOff_2.setGeometry(QtCore.QRect(1160, 0, 110, 35))
+            self.stock_create_writeOff_2.setStyleSheet("\n"
+                                                       "background-color:rgb(91, 91, 91);\n"
+                                                       "color: rgb(217, 217, 217);")
+            self.stock_create_writeOff_2.setAlignment(QtCore.Qt.AlignCenter)
+            self.stock_create_writeOff_2.setObjectName("stock_create_writeOff" + str(i))
+
+            self.stock_create_table_name_lineEdit.setText(item['name'])
+            self.stock_create_table_manufac_lineEdit.setText(item['manufacturer'])
+            self.stock_create_table_item1_insys.setText(str(item['amount']))
+    def drawStockTable(self):
+        self.stockData = fetchItems()
 
         self.stock_main_table = QtWidgets.QTableWidget(self.stock_main)
         self.stock_main_table.setGeometry(QtCore.QRect(60, 120, 1300, 700))
         self.stock_main_table.setRowCount(0)
         self.stock_main_table.setObjectName("stock_main_table")
-        self.stock_main_table.setColumnCount(7)
+        self.stock_main_table.setColumnCount(6)
 
-        self.stock_main_table.setColumnWidth(0, 120)
-        self.stock_main_table.setColumnWidth(1, 235)
-        self.stock_main_table.setColumnWidth(2, 235)
-        self.stock_main_table.setColumnWidth(3, 195)
-        self.stock_main_table.setColumnWidth(4, 118)
-        self.stock_main_table.setColumnWidth(5, 198)
-        self.stock_main_table.setColumnWidth(6, 192)
+        self.stock_main_table.setColumnWidth(0, 150)
+        self.stock_main_table.setColumnWidth(1, 293)
+        self.stock_main_table.setColumnWidth(2, 293)
+        self.stock_main_table.setColumnWidth(3, 243)
+        self.stock_main_table.setColumnWidth(4, 150)
+        self.stock_main_table.setColumnWidth(5, 150)
 
         item = QtWidgets.QTableWidgetItem()
         self.stock_main_table.setHorizontalHeaderItem(0, item)
@@ -44,8 +126,6 @@ class StockPage(object):
         self.stock_main_table.setHorizontalHeaderItem(4, item)
         item = QtWidgets.QTableWidgetItem()
         self.stock_main_table.setHorizontalHeaderItem(5, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.stock_main_table.setHorizontalHeaderItem(6, item)
 
         self.stock_main_table.setRowCount(len(self.stockData))
 
@@ -75,11 +155,8 @@ class StockPage(object):
             cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
             self.stock_main_table.setItem(row, 5, cell)
 
-            cell = QTableWidgetItem(str(item['reserved']))
-            cell.setFlags(cell.flags() & ~Qt.ItemIsEditable)  # Отключение редактирования
-            self.stock_main_table.setItem(row, 6, cell)
-
         self.stockCurrentRow = None
+
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
@@ -92,6 +169,32 @@ class StockPage(object):
 
         #
         self.stock_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        item = self.stock_main_table.horizontalHeaderItem(0)
+        item.setText("Код товара")
+        item = self.stock_main_table.horizontalHeaderItem(1)
+        item.setText("Название")
+        item = self.stock_main_table.horizontalHeaderItem(2)
+        item.setText("Произоводитель")
+        item = self.stock_main_table.horizontalHeaderItem(3)
+        item.setText("Категория")
+        item = self.stock_main_table.horizontalHeaderItem(4)
+        item.setText("Цена")
+        item = self.stock_main_table.horizontalHeaderItem(5)
+        item.setText("Количество")
+    def __init__(self):
+        self.stock = QtWidgets.QWidget()
+        self.stock.setObjectName("stock")
+        self.stock_stackedWidget = QtWidgets.QStackedWidget(self.stock)
+        self.stock_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
+        self.stock_stackedWidget.setObjectName("stock_stackedWidget")
+        self.stock_main = QtWidgets.QWidget()
+        self.stock_main.setObjectName("stock_main")
+
+        # Start of Stock Table
+
+        self.drawStockTable()
+
         # End of Stock Table
 
         self.stock_main_createBtn = QtWidgets.QLabel(self.stock_main)
@@ -161,106 +264,12 @@ class StockPage(object):
         self.stock_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, 40*len(self.stockData)))
         self.stock_create_scrollAreaWidgetContents.setObjectName("stock_create_scrollAreaWidgetContents")
 
-        def showStockList(data):
-            for i, item in enumerate(data):
-                self.stock_create_header.setText('Новая инвентаризация')
-                self.stock_create_table_item1 = QtWidgets.QWidget(self.stock_create_scrollAreaWidgetContents)
-                self.stock_create_table_item1.setGeometry(QtCore.QRect(0, 40*i, 1300, 35))
-                self.stock_create_table_item1.setMinimumSize(QtCore.QSize(0, 0))
-                self.stock_create_table_item1.setObjectName("stock_create_table_item" + str(i))
-                self.stock_create_table_checkbox = QtWidgets.QCheckBox(self.stock_create_table_item1)
-
-                self.stock_create_table_checkbox.setGeometry(QtCore.QRect(0, 0, 35, 35))
-                sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-                sizePolicy.setHorizontalStretch(0)
-                sizePolicy.setVerticalStretch(0)
-                sizePolicy.setHeightForWidth(self.stock_create_table_checkbox.sizePolicy().hasHeightForWidth())
-                self.stock_create_table_checkbox.setSizePolicy(sizePolicy)
-                self.stock_create_table_checkbox.setMinimumSize(QtCore.QSize(0, 0))
-                self.stock_create_table_checkbox.setStyleSheet("QCheckBox::indicator { \n"
-                                                               "    width: 35px; \n"
-                                                               "    height: 35px;\n"
-                                                               "}\n"
-                                                               "QCheckBox {\n"
-                                                               "    background-color: rgb(91, 91, 91);\n"
-                                                               "    border-color: rgb(66, 66, 66);\n"
-                                                               "    border-radius: 6px;\n"
-                                                               "}")
-                self.stock_create_table_checkbox.setText("")
-                self.stock_create_table_checkbox.setIconSize(QtCore.QSize(40, 40))
-                self.stock_create_table_checkbox.setChecked(False)
-                self.stock_create_table_checkbox.setObjectName("stock_create_table_checkbox" + str(i))
-
-                self.stock_create_table_name_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
-                self.stock_create_table_name_lineEdit.setEnabled(False)
-                self.stock_create_table_name_lineEdit.setGeometry(QtCore.QRect(40, 0, 580, 35))
-                self.stock_create_table_name_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
-                font = QtGui.QFont()
-                font.setPointSize(12)
-                self.stock_create_table_name_lineEdit.setFont(font)
-                self.stock_create_table_name_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                                    "border-color: rgb(66, 66, 66);\n"
-                                                                    "background-color:rgb(71, 71, 71);\n"
-                                                                    "border-radius: 8px;\n"
-                                                                    "padding: 5px;")
-                self.stock_create_table_name_lineEdit.setText("")
-                self.stock_create_table_name_lineEdit.setObjectName("stock_create_table_name_lineEdit" + str(i))
-
-                self.stock_create_table_manufac_lineEdit = QtWidgets.QLineEdit(self.stock_create_table_item1)
-                self.stock_create_table_manufac_lineEdit.setEnabled(False)
-                self.stock_create_table_manufac_lineEdit.setGeometry(QtCore.QRect(630, 0, 275, 35))
-                self.stock_create_table_manufac_lineEdit.setMinimumSize(QtCore.QSize(0, 35))
-                font = QtGui.QFont()
-                font.setPointSize(12)
-                self.stock_create_table_manufac_lineEdit.setFont(font)
-                self.stock_create_table_manufac_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                                       "border-color: rgb(66, 66, 66);\n"
-                                                                       "background-color: rgb(71, 71, 71);\n"
-                                                                       "border-radius: 8px;\n"
-                                                                       "padding: 5px;")
-                self.stock_create_table_manufac_lineEdit.setText("")
-                self.stock_create_table_manufac_lineEdit.setObjectName("stock_create_table_manufac_lineEdit" + str(i))
-                self.stock_create_table_item1_insys = QtWidgets.QLineEdit(self.stock_create_table_item1)
-                self.stock_create_table_item1_insys.setEnabled(False)
-                self.stock_create_table_item1_insys.setGeometry(QtCore.QRect(920, 0, 110, 35))
-                self.stock_create_table_item1_insys.setMinimumSize(QtCore.QSize(0, 35))
-                font = QtGui.QFont()
-                font.setPointSize(12)
-                self.stock_create_table_item1_insys.setFont(font)
-                self.stock_create_table_item1_insys.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                                  "border-color: rgb(66, 66, 66);\n"
-                                                                  "background-color: rgb(71, 71, 71);\n"
-                                                                  "border-radius: 8px;\n"
-                                                                  "padding: 5px;")
-                self.stock_create_table_item1_insys.setText("")
-                self.stock_create_table_item1_insys.setAlignment(QtCore.Qt.AlignCenter)
-                self.stock_create_table_item1_insys.setObjectName("stock_create_table_item1_insys" + str(i))
-                self.stock_create_fact = QtWidgets.QSpinBox(self.stock_create_table_item1)
-                self.stock_create_fact.setGeometry(QtCore.QRect(1040, 0, 110, 35))
-                self.stock_create_fact.setStyleSheet("\n"
-                                                     "background-color:rgb(91, 91, 91);\n"
-                                                     "color: rgb(217, 217, 217);\n"
-                                                     "border-color: rgb(66, 66, 66);")
-                self.stock_create_fact.setAlignment(QtCore.Qt.AlignCenter)
-                self.stock_create_fact.setObjectName("stock_create_fact" + str(i))
-                self.stock_create_writeOff_2 = QtWidgets.QSpinBox(self.stock_create_table_item1)
-                self.stock_create_writeOff_2.setGeometry(QtCore.QRect(1160, 0, 110, 35))
-                self.stock_create_writeOff_2.setStyleSheet("\n"
-                                                           "background-color:rgb(91, 91, 91);\n"
-                                                           "color: rgb(217, 217, 217);")
-                self.stock_create_writeOff_2.setAlignment(QtCore.Qt.AlignCenter)
-                self.stock_create_writeOff_2.setObjectName("stock_create_writeOff" + str(i))
-
-                self.stock_create_table_name_lineEdit.setText(item['name'])
-                self.stock_create_table_manufac_lineEdit.setText(item['manufacturer'])
-                self.stock_create_table_item1_insys.setText(str(item['amount']))
-
         self.stock_create_scrollArea.setWidget(self.stock_create_scrollAreaWidgetContents)
         self.stock_create_actions = QtWidgets.QWidget(self.stock_create)
         self.stock_create_actions.setGeometry(QtCore.QRect(800, 80, 191, 80))
         self.stock_create_actions.setObjectName("stock_create_actions")
 
-        showStockList(self.stockData)
+        self.showStockList(self.stockData)
 
         self.stock_create_saveBtn = QtWidgets.QPushButton(self.stock_create)
         self.stock_create_saveBtn.setGeometry(QtCore.QRect(1000, 50, 150, 35))
@@ -334,20 +343,6 @@ class StockPage(object):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        item = self.stock_main_table.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Код товара"))
-        item = self.stock_main_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Название"))
-        item = self.stock_main_table.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Произоводитель"))
-        item = self.stock_main_table.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Категория"))
-        item = self.stock_main_table.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Цена"))
-        item = self.stock_main_table.horizontalHeaderItem(5)
-        item.setText(_translate("MainWindow", "Количество"))
-        item = self.stock_main_table.horizontalHeaderItem(6)
-        item.setText(_translate("MainWindow", "Зарезервировано"))
         self.stock_main_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
         self.stock_create_saveBtn.setText(_translate("MainWindow", "СОХРАНИТЬ"))
         self.stock_create_closeBtn.setText(_translate("MainWindow", "ЗАКРЫТЬ"))
@@ -356,4 +351,4 @@ class StockPage(object):
         self.stock_create_table_insys.setText(_translate("MainWindow", "В системе"))
         self.stock_create_table_fact.setText(_translate("MainWindow", "Факт"))
         self.stock_create_writeOff.setText(_translate("MainWindow", "Списать"))
-        self.stock_create_tip.setText(_translate("MainWindow", "Выбранные товары будут добавлены в PDF файл"))
+        self.stock_create_tip.setText(_translate("MainWindow", "После сохранения товары будут добавлены в PDF файл"))

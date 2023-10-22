@@ -5,17 +5,7 @@ from PyQt5.QtWidgets import QTableWidgetItem
 from utils import *
 
 class WriteOffsPage(object):
-    def __init__(self):
-        self.writeOffs = QtWidgets.QWidget()
-        self.writeOffs.setObjectName("writeOffs")
-        self.writeOffs_stackedWidget = QtWidgets.QStackedWidget(self.writeOffs)
-        self.writeOffs_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
-        self.writeOffs_stackedWidget.setObjectName("writeOffs_stackedWidget")
-        self.writeOffs_main = QtWidgets.QWidget()
-        self.writeOffs_main.setObjectName("writeOffs_main")
-
-        # Start of WriteOffs Table
-
+    def drawWriteOffsTable(self):
         self.writeOffsData = fetchWriteOffs()
 
         self.writeOffs_main_table = QtWidgets.QTableWidget(self.writeOffs_main)
@@ -66,6 +56,7 @@ class WriteOffsPage(object):
             self.writeOffs_main_table.setItem(row, 4, cell)
 
         self.writeOffsCurrentRow = None
+
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
@@ -78,6 +69,29 @@ class WriteOffsPage(object):
 
         #
         self.writeOffs_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        item = self.writeOffs_main_table.horizontalHeaderItem(0)
+        item.setText("Код списания")
+        item = self.writeOffs_main_table.horizontalHeaderItem(1)
+        item.setText("Дата")
+        item = self.writeOffs_main_table.horizontalHeaderItem(2)
+        item.setText("Название товара")
+        item = self.writeOffs_main_table.horizontalHeaderItem(3)
+        item.setText("Количество")
+        item = self.writeOffs_main_table.horizontalHeaderItem(4)
+        item.setText("Причина")
+    def __init__(self):
+        self.writeOffs = QtWidgets.QWidget()
+        self.writeOffs.setObjectName("writeOffs")
+        self.writeOffs_stackedWidget = QtWidgets.QStackedWidget(self.writeOffs)
+        self.writeOffs_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
+        self.writeOffs_stackedWidget.setObjectName("writeOffs_stackedWidget")
+        self.writeOffs_main = QtWidgets.QWidget()
+        self.writeOffs_main.setObjectName("writeOffs_main")
+
+        # Start of WriteOffs Table
+
+        self.drawWriteOffsTable()
 
         # End of WriteOffs Table
 
@@ -274,17 +288,6 @@ class WriteOffsPage(object):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-
-        item = self.writeOffs_main_table.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Код списания"))
-        item = self.writeOffs_main_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Дата"))
-        item = self.writeOffs_main_table.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Название товара"))
-        item = self.writeOffs_main_table.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Количество"))
-        item = self.writeOffs_main_table.horizontalHeaderItem(4)
-        item.setText(_translate("MainWindow", "Причина"))
         self.writeOffs_main_search.setPlaceholderText(_translate("MainWindow", "Найти..."))
         self.page_header_6.setText(_translate("MainWindow", "Списание 1234123"))
         self.writeOff_create_cause_header.setText(_translate("MainWindow", "Причина"))
