@@ -201,7 +201,7 @@ def updateEmployee(id, surname=None, name=None, patronymic='', role='Сотру�
     user.surname = surname
     user.name = name
     user.patronymic = patronymic
-    user.role=role_id
+    user.role = role_id
     user.phoneNumber = number
     user.nickname = username
     user.password = password
@@ -210,6 +210,7 @@ def updateEmployee(id, surname=None, name=None, patronymic='', role='Сотру�
 
 def deleteEmployee(id):
     return Users.delete_instance(Users.get(Users.id == id))
+
 
 def fetchOrders():
     orders = []
@@ -225,6 +226,38 @@ def fetchOrders():
             }
         )
     return orders
+
+
+def fetchItemsInOrders(id):
+    items = []
+    for item in ItemsInOrders.select().where(ItemsInOrders.order == id):
+        if item.item is None:
+            items.append(
+                {
+                    'id': 0,
+                    'name': "Удаленный товар",
+                    "category": "",
+                    'unit': "",
+                    'price': "",
+                    'description': "",
+                    'manufacturer': "",
+                    'amount': "?"
+                }
+            )
+        else:
+            items.append(
+                {
+                    'id': item.item.id,
+                    'name': item.item.name,
+                    "category": Categories.get(Categories.id == item.item.category).name,
+                    'unit': Units.get(Units.id == item.item.unit).name,
+                    'price': item.item.price,
+                    'description': item.item.description,
+                    'manufacturer': Manufacturers.get(Manufacturers.id == item.item.manufacturer).name,
+                    'amount': item.amount
+                }
+            )
+    return items
 
 
 def createOrder(address="", status="", items=[]):
@@ -252,6 +285,23 @@ def getItemsByOrderId(id: str):
     order = filter(lambda x: x['id'] == id, fetchOrders())
     order = list(order)[0]
     return order['items']
+
+
+def deleteOrder(id):
+    Orders.delete_instance(Orders.get(Orders.id == id))
+    return 0
+
+
+def updateOrder(id, address="", status="", items=[]):
+    order = Orders.get(Orders.id == id)
+    order.address = address
+    order.status = status
+    order.save()
+    for item in items:
+        itemInDB = Items.get(Items.id == item['id'])
+        itemInDB.amount = item['amount']
+        itemInDB.save(0)
+    return 0
 
 
 def fetchGetStocks():

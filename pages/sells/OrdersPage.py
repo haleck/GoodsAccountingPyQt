@@ -9,7 +9,9 @@ from utils import *
 
 
 class OrdersPage(object):
-    def showOrdersList(self, data):
+    def showOrdersList(self, data, persistOreder=False):
+        self.orders_create_scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1286, len(data) * 40))
+        self.orders_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, len(data) * 40))
         for i, item in enumerate(data):
             self.orders_create_header.setText('Новый заказ')
             self.orders_create_item1 = QtWidgets.QWidget(self.orders_create_scrollAreaWidgetContents)
@@ -26,18 +28,22 @@ class OrdersPage(object):
             self.orders_create_table_checkbox.setSizePolicy(sizePolicy)
             self.orders_create_table_checkbox.setMinimumSize(QtCore.QSize(0, 0))
             self.orders_create_table_checkbox.setStyleSheet("QCheckBox::indicator { \n"
-                                                           "    width: 35px; \n"
-                                                           "    height: 35px;\n"
-                                                           "}\n"
-                                                           "QCheckBox {\n"
-                                                           "    background-color: rgb(91, 91, 91);\n"
-                                                           "    border-color: rgb(66, 66, 66);\n"
-                                                           "    border-radius: 6px;\n"
-                                                           "}")
+                                                            "    width: 35px; \n"
+                                                            "    height: 35px;\n"
+                                                            "}\n"
+                                                            "QCheckBox {\n"
+                                                            "    background-color: rgb(91, 91, 91);\n"
+                                                            "    border-color: rgb(66, 66, 66);\n"
+                                                            "    border-radius: 6px;\n"
+                                                            "}")
             self.orders_create_table_checkbox.setText("")
             self.orders_create_table_checkbox.setIconSize(QtCore.QSize(40, 40))
             self.orders_create_table_checkbox.setChecked(False)
             self.orders_create_table_checkbox.setObjectName("orders_create_table_checkbox" + str(i))
+            self.orders_create_table_checkbox.clicked.connect(self.handleChangeOrderItem)
+            if persistOreder:
+                self.orders_create_table_checkbox.setChecked(True)
+            self.handleChangeOrderItem()
 
             self.orders_create_table_name_lineEdit = QtWidgets.QLineEdit(self.orders_create_item1)
             self.orders_create_table_name_lineEdit.setEnabled(False)
@@ -47,10 +53,10 @@ class OrdersPage(object):
             font.setPointSize(12)
             self.orders_create_table_name_lineEdit.setFont(font)
             self.orders_create_table_name_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                                "border-color: rgb(66, 66, 66);\n"
-                                                                "background-color:rgb(71, 71, 71);\n"
-                                                                "border-radius: 8px;\n"
-                                                                "padding: 5px;")
+                                                                 "border-color: rgb(66, 66, 66);\n"
+                                                                 "background-color:rgb(71, 71, 71);\n"
+                                                                 "border-radius: 8px;\n"
+                                                                 "padding: 5px;")
             self.orders_create_table_name_lineEdit.setText("")
             self.orders_create_table_name_lineEdit.setObjectName("orders_create_table_name_lineEdit" + str(i))
 
@@ -62,20 +68,20 @@ class OrdersPage(object):
             font.setPointSize(12)
             self.orders_create_table_manufac_lineEdit.setFont(font)
             self.orders_create_table_manufac_lineEdit.setStyleSheet("color: rgb(217, 217, 217);\n"
-                                                                   "border-color: rgb(66, 66, 66);\n"
-                                                                   "background-color: rgb(71, 71, 71);\n"
-                                                                   "border-radius: 8px;\n"
-                                                                   "padding: 5px;")
+                                                                    "border-color: rgb(66, 66, 66);\n"
+                                                                    "background-color: rgb(71, 71, 71);\n"
+                                                                    "border-radius: 8px;\n"
+                                                                    "padding: 5px;")
             self.orders_create_table_manufac_lineEdit.setText("")
             self.orders_create_table_manufac_lineEdit.setObjectName("orders_create_table_manufac_lineEdit" + str(i))
 
-
-
             self.orders_create_writeOff_2 = QtWidgets.QSpinBox(self.orders_create_item1)
             self.orders_create_writeOff_2.setGeometry(QtCore.QRect(1160, 0, 110, 35))
-            self.orders_create_writeOff_2.setStyleSheet("\n"
-                                                       "background-color:rgb(91, 91, 91);\n"
-                                                       "color: rgb(217, 217, 217);")
+            self.orders_create_writeOff_2.setStyleSheet(
+                "color: rgb(217, 217, 217);background-color: rgb(71, 71, 71);border-color: rgb(66, 66, 66);")
+            if persistOreder:
+                self.orders_create_writeOff_2.setStyleSheet("background-color:rgb(91, 91, 91);color: rgb(217, 217, 217);border-color: rgb(66, 66, 66);")
+                self.orders_create_writeOff_2.setValue(item['amount'])
             self.orders_create_writeOff_2.setAlignment(QtCore.Qt.AlignCenter)
             self.orders_create_writeOff_2.setObjectName("orders_create_writeOff" + str(i))
 
@@ -90,7 +96,7 @@ class OrdersPage(object):
             self.orders_create_item1 = QtWidgets.QWidget(self.orders_create_scrollAreaWidgetContents)
             self.orders_create_item1.setGeometry(QtCore.QRect(0, i * 40, 1300, 35))
             self.orders_create_item1.setMinimumSize(QtCore.QSize(0, 0))
-            self.orders_create_item1.setObjectName("orders_create_item" + str(i) + str(random.randint(0,50)))
+            self.orders_create_item1.setObjectName("orders_create_item" + str(i) + str(random.randint(0, 50)))
             self.orders_create_item1_name = QtWidgets.QLineEdit(self.orders_create_item1)
             self.orders_create_item1_name.setEnabled(False)
             self.orders_create_item1_name.setGeometry(QtCore.QRect(0, 0, 630, 35))
@@ -104,7 +110,8 @@ class OrdersPage(object):
                                                         "border-radius: 8px;\n"
                                                         "padding: 5px;")
             self.orders_create_item1_name.setText("")
-            self.orders_create_item1_name.setObjectName("orders_create_item1_name" + str(i)+ str(random.randint(0,50)))
+            self.orders_create_item1_name.setObjectName(
+                "orders_create_item1_name" + str(i) + str(random.randint(0, 50)))
             self.orders_create_item1_manufac = QtWidgets.QLineEdit(self.orders_create_item1)
             self.orders_create_item1_manufac.setEnabled(False)
             self.orders_create_item1_manufac.setGeometry(QtCore.QRect(640, 0, 351, 35))
@@ -118,7 +125,8 @@ class OrdersPage(object):
                                                            "border-radius: 8px;\n"
                                                            "padding: 5px;")
             self.orders_create_item1_manufac.setText("")
-            self.orders_create_item1_manufac.setObjectName("orders_create_item1_manufac" + str(i)+ str(random.randint(0,50)))
+            self.orders_create_item1_manufac.setObjectName(
+                "orders_create_item1_manufac" + str(i) + str(random.randint(0, 50)))
             self.orders_create_item1_insys = QtWidgets.QLineEdit(self.orders_create_item1)
             self.orders_create_item1_insys.setEnabled(False)
             self.orders_create_item1_insys.setGeometry(QtCore.QRect(1000, 0, 110, 35))
@@ -133,7 +141,8 @@ class OrdersPage(object):
                                                          "padding: 5px;")
             self.orders_create_item1_insys.setText("")
             self.orders_create_item1_insys.setAlignment(QtCore.Qt.AlignCenter)
-            self.orders_create_item1_insys.setObjectName("orders_create_item1_insys" + str(i)+ str(random.randint(0,50)))
+            self.orders_create_item1_insys.setObjectName(
+                "orders_create_item1_insys" + str(i) + str(random.randint(0, 50)))
             self.orders_create_item1_inorder = QtWidgets.QSpinBox(self.orders_create_item1)
             self.orders_create_item1_inorder.setGeometry(QtCore.QRect(1120, 0, 110, 35))
             self.orders_create_item1_inorder.setStyleSheet("\n"
@@ -141,7 +150,8 @@ class OrdersPage(object):
                                                            "color: rgb(217, 217, 217);\n"
                                                            "border-color: rgb(66, 66, 66);")
             self.orders_create_item1_inorder.setAlignment(QtCore.Qt.AlignCenter)
-            self.orders_create_item1_inorder.setObjectName("orders_create_item1_inorder" + str(i)+ str(random.randint(0,50)))
+            self.orders_create_item1_inorder.setObjectName(
+                "orders_create_item1_inorder" + str(i) + str(random.randint(0, 50)))
             self.orders_create_item1_close = QtWidgets.QLabel(self.orders_create_item1)
             self.orders_create_item1_close.setGeometry(QtCore.QRect(1240, 0, 35, 35))
             self.orders_create_item1_close.setStyleSheet("QLabel:hover {\n"
@@ -150,7 +160,8 @@ class OrdersPage(object):
                                                          "}")
             self.orders_create_item1_close.setText("")
             self.orders_create_item1_close.setPixmap(QtGui.QPixmap("assets/X.png"))
-            self.orders_create_item1_close.setObjectName("orders_create_item1_close" + str(i)+ str(random.randint(0,50)))
+            self.orders_create_item1_close.setObjectName(
+                "orders_create_item1_close" + str(i) + str(random.randint(0, 50)))
 
             self.orders_create_item1_name.setText(item['name'])
             self.orders_create_item1_manufac.setText(item['manufacturer'])
@@ -274,6 +285,7 @@ class OrdersPage(object):
         item.setText("Адрес")
         item = self.orders_main_table.horizontalHeaderItem(3)
         item.setText("Дата и время")
+
     def __init__(self):
         self.ordersCurrentItems = []
         self.orders = QtWidgets.QWidget()

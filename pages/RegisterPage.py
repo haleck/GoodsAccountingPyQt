@@ -212,7 +212,6 @@ class RegisterPage(object):
                                                           "border-radius: 8px;\n"
                                                           "padding: 5px;")
         self.register_page_1_name_lineeditr.setText("")
-        self.register_page_1_name_lineeditr.setEchoMode(QtWidgets.QLineEdit.Password)
         self.register_page_1_name_lineeditr.setObjectName("register_page_1_name_lineeditr")
         self.register_page_1_btn_w = QtWidgets.QWidget(self.register_page_1_frame)
         self.register_page_1_btn_w.setGeometry(QtCore.QRect(30, 500, 399, 91))
@@ -342,26 +341,29 @@ class RegisterPage(object):
         self.register_page_2_btn.clicked.connect(self.registerUser)  # Кнопка регистрации на RegisterPage2
 
     def registerUser(self):
+        print(len(Roles.select()))
+        if len(Roles.select()) == 0:
+            setUpRoles()
         if len(Users.select()) == 0:
             result = createEmployee(
                 name=self.register_page_1_name_lineeditr.text(),
                 surname=self.register_page_1_surname_lineedit.text(),
                 patronymic=self.register_page_1_patronymic_lineedit.text(),
-                nickname=self.register_page_2_login_lineedit.text(),
+                username=self.register_page_2_login_lineedit.text(),
                 password=self.register_page_2_psswrd_lineedit.text(),
-                phoneNumber=self.register_page_1_number_lineedit.text(),
-                role=Roles.get(Roles.name == "Директор")
+                number=self.register_page_1_number_lineedit.text(),
+                role="Директор"
             )
             self.currentUser = result.id
             if type(result) == type(Users()):
                 setUpUnits()
                 setUpManufacturers()
                 setUpCategories()
-                setUpRoles()
                 setUpStatuses()
                 setUpCausesToReturn()
                 setUpActions()
                 setUpCausesToWriteOff()
+                self.stackedWidget.setCurrentIndex(1)
         else:
             self.showPopUp(
                 'Регистрацию в системе проходит только директор,\n если вы являетесь сотрудником, попросите у \nадминистратора данные для входа в ваш аккаунт')

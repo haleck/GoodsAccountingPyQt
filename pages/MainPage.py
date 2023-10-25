@@ -535,9 +535,9 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         # End of sells
 
         self.sells_tab.addTab(self.stock, "")
-        # self.sells_tab.addTab(self.orders, "")
-        # self.sells_tab.addTab(self.returns, "")
-        # self.sells_tab.addTab(self.getStocks, "")
+        self.sells_tab.addTab(self.orders, "")
+        self.sells_tab.addTab(self.returns, "")
+        self.sells_tab.addTab(self.getStocks, "")
         self.sells_tab.addTab(self.writeOffs, "")
 
         # End of sells
@@ -961,9 +961,11 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_main_table.itemDoubleClicked.connect(self.setUpEmployeesCreatePage)
     # Items
     def setItemsMainPage(self, event):
+        self.itemsCurrentRow = None
         self.items_stackedWidget.setCurrentIndex(0)
 
     def setItemsCreatePage(self, event):
+        self.itemsCurrentRow = None
         self.items_create_header.setText('Добавление товара')
         self.items_create_fieldItem_lineEdit.setText('')
         self.items_create_descr_textEdit.setText('')
@@ -1009,11 +1011,11 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
                     self.drawWatchTable()
         except peewee.IntegrityError as Er:
             print(Er)
-        except ValueError as Er:
-            print(Er)
-        except Exception as Ex:
-            print(Ex)
-
+        # except ValueError as Er:
+        #     print(Er)
+        # except Exception as Ex:
+        #     print(Ex)
+        self.itemsCurrentRow = None
         self.items_stackedWidget.setCurrentIndex(0)
 
     def itemsCreateDelete(self, event):
@@ -1049,10 +1051,8 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         for i, child in enumerate(self.stock_create_scrollAreaWidgetContents.findChildren(QWidget)):
             if child.objectName().startswith("stock_create_table_name_lineEdit"):
                 ids.append(Items.get(Items.name == child.text()).id)
-            if child.objectName().startswith("orders_create_item1_insys"):
-                child.setText(Items.get(Items.id == ids[-1]).amount)
             if child.objectName().startswith("stock_create_fact"):
-                child.setValue(Items.get(Items.id == ids[-1]).amount)
+                child.setValue(Items.get(Items.id == ids.pop()).amount)
             if child.objectName().startswith("stock_create_writeOff"):
                 child.setValue(0)
         self.stock_stackedWidget.setCurrentIndex(1)
@@ -1115,10 +1115,10 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
     def setOrdersCreatePage(self, event):
         self.ordersCurrentRow = None
+        self.clearOrdersInCreationPage()
         self.orders_create_header.setText('Создание заказа')
         self.orders_create_login_lineEdit.setText('')
         self.orders_create_status_combobox.setCurrentText('Создан')
-        # self.clearOrdersInCreationPage()
         self.showOrdersList(fetchItems())
         # self.orders_create_inorder.setText('')
         self.orders_stackedWidget.setCurrentIndex(1)
@@ -1127,44 +1127,98 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.orders_stackedWidget.setCurrentIndex(0)
 
     def ordersCreateDelete(self, event):
+        result = deleteOrder(self.ordersData[self.ordersCurrentRow]['id'])
+        if result == 0:
+            createNewLog('Удаление заказа', self.currentUser)
+            self.drawOrdersTable()
+            self.drawWatchTable()
+        self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
         self.orders_stackedWidget.setCurrentIndex(0)
+
+    def handleChangeOrderItem(self):
+        checkbox_checked = False
+        for i, child in enumerate(self.orders_create_scrollAreaWidgetContents.findChildren(QWidget)):
+            if child.objectName().startswith("orders_create_table_checkbox"):
+                if child.isChecked():
+                    checkbox_checked = True
+                else:
+                    checkbox_checked = False
+            if child.objectName().startswith("orders_create_writeOff"):
+                if child.value() < 1 and checkbox_checked:
+                    child.setValue(1)
+                    child.setStyleSheet("background-color:rgb(91, 91, 91);color: rgb(217, 217, 217);border-color: rgb(66, 66, 66);")
 
     def ordersCreateSave(self, event):
         try:
-            items = []
-            inOrders = []
-            ids = []
-            amounts = []
+            if self.ordersCurrentRow is not None:
+                items = []
+                inOrders = []
+                ids = []
+                amounts = []
 
-            for i, child in enumerate(self.orders_create_scrollAreaWidgetContents.findChildren(QWidget)):
-                if child.objectName().startswith("orders_create_table_checkbox"):
-                    inOrders.append(child.isChecked())
-                if child.objectName().startswith("orders_create_table_name_lineEdit"):
-                    ids.append(Items.get(Items.name == child.text()))
-                if child.objectName().startswith("orders_create_writeOff"):
-                    amounts.append(child.value())
-            for i in range(len(amounts)):
-                if inOrders[i]:
-                    items.append(
-                        {
-                            'id': ids[i].id,
-                            'amount': amounts[i]
-                        }
-                    )
+                for i, child in enumerate(self.orders_create_scrollAreaWidgetContents.findChildren(QWidget)):
+                    if child.objectName().startswith("orders_create_table_checkbox"):
+                        inOrders.append(child.isChecked())
+                    if child.objectName().startswith("orders_create_table_name_lineEdit"):
+                        ids.append(Items.get(Items.name == child.text()))
+                    if child.objectName().startswith("orders_create_writeOff"):
+                        amounts.append(child.value())
+                for i in range(len(amounts)):
+                    if inOrders[i]:
+                        items.append(
+                            {
+                                'id': ids[i].id,
+                                'amount': amounts[i]
+                            }
+                        )
 
-            result = createOrder(
-                address=self.orders_create_login_lineEdit.text(),
-                status=Statuses.get(Statuses.name == self.orders_create_status_combobox.currentText()).id,
-                items=items
-            )
+                result = updateOrder(
+                    id=self.ordersData[self.ordersCurrentRow]['id'],
+                    address=self.orders_create_login_lineEdit.text(),
+                    status=Statuses.get(Statuses.name == self.orders_create_status_combobox.currentText()).id,
+                    items=items
+                )
 
-            if result == 0:
-                createNewLog('Создание заказа', self.currentUser)
-                self.drawOrdersTable()
-                self.drawStockTable()
-                self.drawWatchTable()
+                if result == 0:
+                    createNewLog('Редактирование заказа', self.currentUser)
+                    self.drawOrdersTable()
+                    self.drawStockTable()
+                    self.drawWatchTable()
+                self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
+            else:
+                items = []
+                inOrders = []
+                ids = []
+                amounts = []
 
-            self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
+                for i, child in enumerate(self.orders_create_scrollAreaWidgetContents.findChildren(QWidget)):
+                    if child.objectName().startswith("orders_create_table_checkbox"):
+                        inOrders.append(child.isChecked())
+                    if child.objectName().startswith("orders_create_table_name_lineEdit"):
+                        ids.append(Items.get(Items.name == child.text()))
+                    if child.objectName().startswith("orders_create_writeOff"):
+                        amounts.append(child.value())
+                for i in range(len(amounts)):
+                    if inOrders[i]:
+                        items.append(
+                            {
+                                'id': ids[i].id,
+                                'amount': amounts[i]
+                            }
+                        )
+
+                result = createOrder(
+                    address=self.orders_create_login_lineEdit.text(),
+                    status=Statuses.get(Statuses.name == self.orders_create_status_combobox.currentText()).id,
+                    items=items
+                )
+
+                if result == 0:
+                    createNewLog('Создание заказа', self.currentUser)
+                    self.drawOrdersTable()
+                    self.drawStockTable()
+                    self.drawWatchTable()
+                self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
         except Exception as Ex:
             print(Ex)
 
@@ -1173,28 +1227,12 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     def setUpOrdersCreatePage(self):
         row = self.ordersData[self.ordersCurrentRow]
         self.clearOrdersInCreationPage()
-        self.showOrdersList(fetchItems())
+        self.showOrdersList(fetchItemsInOrders(row['id']), persistOreder=True)
+
         self.orders_create_header.setText('Заказ ' + str(row['id']))
         self.orders_create_login_lineEdit.setText(row['address'])
         self.orders_create_status_combobox.setCurrentText(row['status'])
 
-        def inOrder(id):
-            items = ItemsInOrders.select().where(ItemsInOrders.order == row['id'])
-            for item in items:
-                if item.item == id:
-                    return True
-            return False
-
-        counter = 0
-        for i, child in enumerate(self.orders_create_scrollAreaWidgetContents.findChildren(QWidget)):
-            if child.objectName().startswith("orders_create_table_checkbox"):
-                print(child.objectName())
-                counter += 1
-            # if child.objectName().startswith("orders_create_table_name_lineEdit"):
-            #     ids.append(Items.get(Items.name == child.text()))
-            # if child.objectName().startswith("orders_create_writeOff"):
-            #     amounts.append(child.value())
-        print(counter)
         self.orders_stackedWidget.setCurrentIndex(1)
 
     def setReturnsMainPage(self, event):

@@ -2,6 +2,7 @@ from peewee import Model, CharField, IntegerField, ForeignKeyField, PostgresqlDa
 
 db = PostgresqlDatabase('dbb', user='zdiroog', password='password', host='localhost', port=5432)
 
+
 class BaseModel(Model):
     class Meta:
         database = db
@@ -14,28 +15,12 @@ class Statuses(BaseModel):
 class Orders(BaseModel):
     address = CharField()
     dateAndTime = CharField()
-    status = ForeignKeyField(Statuses, backref='order')
+    status = ForeignKeyField(Statuses, backref='order', on_delete="SET NULL", null=True)
 
 
 class Returns(BaseModel):
     dateAndTime = CharField()
-    order = ForeignKeyField(Orders, backref='Return')
-
-
-class ItemsInOrders(BaseModel):
-    amount = IntegerField()
-    item = DeferredForeignKey("Items", to_field='id', backref='itemInOrder')
-    order = ForeignKeyField(Orders, to_field='id', backref='itemInOrder')
-
-
-class Items(BaseModel):
-    name = CharField(unique=True)
-    price = IntegerField(null=True)
-    description = CharField(null=True)
-    amount = IntegerField(null=True)
-    category = DeferredForeignKey("Categories", backref='item')
-    unit = DeferredForeignKey("Units", backref='item')
-    manufacturer = DeferredForeignKey("Manufacturers", backref='item')
+    order = ForeignKeyField(Orders, backref='Return', on_delete="CASCADE")
 
 
 class Categories(BaseModel):
@@ -52,49 +37,69 @@ class Manufacturers(BaseModel):
     phoneNumber = CharField(null=True)
 
 
-class ItemsInReturns(BaseModel):
+class Items(BaseModel):
+    name = CharField(unique=True)
+    price = IntegerField(null=True)
+    description = CharField(null=True)
+    amount = IntegerField(null=True)
+    category = ForeignKeyField(Categories, backref='item', on_delete="SET NULL", null=True)
+    unit = ForeignKeyField(Units, backref='item', on_delete="SET NULL", null=True)
+    manufacturer = ForeignKeyField(Manufacturers, backref='item', on_delete="SET NULL", null=True)
+
+
+class ItemsInOrders(BaseModel):
     amount = IntegerField()
-    cause = DeferredForeignKey("CausesToReturn", backref='itemInReturn')
-    item = ForeignKeyField(Items, to_field='id', backref='itemInReturn')
-    return1 = ForeignKeyField(Returns, to_field='id', backref='itemInReturn')
+    item = ForeignKeyField(Items, to_field='id', backref='itemInOrder', on_delete="SET NULL", null=True)
+    order = ForeignKeyField(Orders, to_field='id', backref='itemInOrder', on_delete="CASCADE")
 
 
 class CausesToReturn(BaseModel):
     cause = CharField(unique=True)
 
 
-class ItemsInInventory(BaseModel):
-    currentAmount = IntegerField(null=True)
-    factAmount = IntegerField()
-    writeOffAmount = IntegerField(null=True)
-    item = ForeignKeyField(Items, to_field='id', backref='itemInInventory')
-    inventory = DeferredForeignKey("Inventory", to_field='id', backref='itemInInventory')
+class ItemsInReturns(BaseModel):
+    amount = IntegerField()
+    cause = ForeignKeyField(CausesToReturn, backref='itemInReturn', on_delete="SET NULL", null=True)
+    item = ForeignKeyField(Items, to_field='id', backref='itemInReturn', on_delete="SET NULL", null=True)
+    return1 = ForeignKeyField(Returns, to_field='id', backref='itemInReturn', on_delete="CASCADE")
 
 
 class Inventory(BaseModel):
     dateAndTime = CharField()
 
 
-class WriteOffs(BaseModel):
-    item = ForeignKeyField(Items, to_field='id', backref='writeOff')
-    cause = DeferredForeignKey("CausesToWriteOff", backref='writeOff')
-    amount = IntegerField()
-    dateAndTime = CharField()
+class ItemsInInventory(BaseModel):
+    currentAmount = IntegerField(null=True)
+    factAmount = IntegerField()
+    writeOffAmount = IntegerField(null=True)
+    item = ForeignKeyField(Items, to_field='id', backref='itemInInventory', on_delete="SET NULL", null=True)
+    inventory = ForeignKeyField(Inventory, to_field='id', backref='itemInInventory', on_delete="CASCADE")
 
 
 class CausesToWriteOff(BaseModel):
     cause = CharField(unique=True)
 
 
-class ItemsInGetStocks(BaseModel):
+class WriteOffs(BaseModel):
+    item = ForeignKeyField(Items, to_field='id', backref='writeOff', on_delete="CASCADE")
+    cause = ForeignKeyField(CausesToWriteOff, backref='writeOff', on_delete="SET NULL", null=True)
     amount = IntegerField()
-    goodQualityAmount = IntegerField(null=True)
-    item = ForeignKeyField(Items, to_field='id', backref='itemInGetStock')
-    getStock = DeferredForeignKey("GetStocks", to_field='id', backref='itemInGetStock')
+    dateAndTime = CharField()
 
 
 class GetStocks(BaseModel):
     dateAndTime = CharField()
+
+
+class ItemsInGetStocks(BaseModel):
+    amount = IntegerField()
+    goodQualityAmount = IntegerField(null=True)
+    item = ForeignKeyField(Items, to_field='id', backref='itemInGetStock', on_delete="SET NULL", null=True)
+    getStock = ForeignKeyField(GetStocks, to_field='id', backref='itemInGetStock', on_delete="CASCADE")
+
+
+class Roles(BaseModel):
+    name = CharField(unique=True)
 
 
 class Users(BaseModel):
@@ -104,18 +109,14 @@ class Users(BaseModel):
     nickname = CharField(unique=True)
     password = CharField()
     phoneNumber = CharField(null=True)
-    role = DeferredForeignKey("Roles", backref='user')
-
-
-class Roles(BaseModel):
-    name = CharField(unique=True)
-
-
-class LogTable(BaseModel):
-    action = DeferredForeignKey("ActionsTable", backref='log')
-    user = ForeignKeyField(Users, backref='log')
-    dateAndTime = CharField()
+    role = ForeignKeyField(Roles, backref='user', on_delete="RESTRICT")
 
 
 class ActionsTable(BaseModel):
     action = CharField(unique=True)
+
+
+class LogTable(BaseModel):
+    action = ForeignKeyField(ActionsTable, backref='log', on_delete="SET NULL", null=True)
+    user = ForeignKeyField(Users, backref='log', on_delete="SET NULL", null=True)
+    dateAndTime = CharField()
