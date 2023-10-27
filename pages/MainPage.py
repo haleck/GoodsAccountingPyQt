@@ -934,7 +934,6 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         #   Returns
         self.returns_main_createBtn.mousePressEvent = self.setReturnsCreatePage
         self.returns_create_backBtn.mousePressEvent = self.setReturnsMainPage
-        self.returns_create_delete_img.mousePressEvent = self.returnsCreateDelete
         self.returns_create_saveBtn.clicked.connect(self.returnsCreateSave)
         self.returns_create_closeBtn.clicked.connect(self.returnsCreateClose)
         self.returns_main_table.itemDoubleClicked.connect(self.setUpReturnsPage)
@@ -1131,7 +1130,9 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         if result == 0:
             createNewLog('Удаление заказа', self.currentUser)
             self.drawOrdersTable()
+            self.drawReturnsTable()
             self.drawWatchTable()
+            self.drawStockTable()
         self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
         self.orders_stackedWidget.setCurrentIndex(0)
 
@@ -1240,6 +1241,8 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
 
     def setReturnsCreatePage(self, event):
         self.returns_create_order_lineEdit.setEnabled(True)
+        self.returns_create_cause_comboBox.setEnabled(True)
+
         self.returnsCurrentRow = None
         self.clearReturnsCreatePage()
         self.returns_create_item = QtWidgets.QLabel(self.returns_create)
@@ -1258,16 +1261,54 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     def returnsCreateClose(self):
         self.returns_stackedWidget.setCurrentIndex(0)
 
-    def returnsCreateDelete(self, event):
-        self.returns_stackedWidget.setCurrentIndex(0)
 
     def returnsCreateSave(self):
+        try:
+            if self.returnsCurrentRow is None:
+                items = []
+                ids = []
+                amounts = []
+
+                for i, child in enumerate(self.returns_create_scrollAreaWidgetContents.findChildren(QWidget)):
+                    if child.objectName().startswith("returns_create_item1_name"):
+                        ids.append(Items.get(Items.name == child.text()))
+                    if child.objectName().startswith("returns_create_item1_amount"):
+                        amounts.append(child.value())
+                for i in range(len(amounts)):
+                    if amounts[i] > 0:
+                        items.append(
+                            {
+                                'id': ids[i].id,
+                                'amount': amounts[i]
+                            }
+                        )
+
+
+                result = createReturn(
+                    order=self.returns_create_order_lineEdit.text(),
+                    cause=self.returns_create_cause_comboBox.currentText(),
+                    items=items
+                )
+
+                if result == 0:
+                    createNewLog('Создание возврата', self.currentUser)
+                    self.drawStockTable()
+                    self.drawReturnsTable()
+                    self.drawWatchTable()
+                self.returns_main_table.itemDoubleClicked.connect(self.setUpReturnsPage)
+        except Exception as Ex:
+            print(Ex)
+
         self.returns_stackedWidget.setCurrentIndex(0)
 
     def setUpReturnsPage(self):
         self.returns_create_order_lineEdit.setEnabled(False)
         self.clearReturnsCreatePage()
         self.showListOfReturns(self.returnsData[self.returnsCurrentRow])
+
+        self.returns_create_order_lineEdit.setEnabled(False)
+        self.returns_create_cause_comboBox.setEnabled(False)
+
         self.returns_stackedWidget.setCurrentIndex(1)
 
     def setGetStocksMainPage(self, event):

@@ -18,8 +18,13 @@ class Orders(BaseModel):
     status = ForeignKeyField(Statuses, backref='order', on_delete="SET NULL", null=True)
 
 
+class CausesToReturn(BaseModel):
+    cause = CharField(unique=True)
+
+
 class Returns(BaseModel):
     dateAndTime = CharField()
+    cause = ForeignKeyField(CausesToReturn, backref='itemInReturn', on_delete="SET NULL", null=True)
     order = ForeignKeyField(Orders, backref='Return', on_delete="CASCADE")
 
 
@@ -53,13 +58,8 @@ class ItemsInOrders(BaseModel):
     order = ForeignKeyField(Orders, to_field='id', backref='itemInOrder', on_delete="CASCADE")
 
 
-class CausesToReturn(BaseModel):
-    cause = CharField(unique=True)
-
-
 class ItemsInReturns(BaseModel):
     amount = IntegerField()
-    cause = ForeignKeyField(CausesToReturn, backref='itemInReturn', on_delete="SET NULL", null=True)
     item = ForeignKeyField(Items, to_field='id', backref='itemInReturn', on_delete="SET NULL", null=True)
     return1 = ForeignKeyField(Returns, to_field='id', backref='itemInReturn', on_delete="CASCADE")
 

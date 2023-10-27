@@ -1,3 +1,5 @@
+import random
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QTableWidgetItem, QWidget
@@ -6,10 +8,16 @@ from utils import *
 
 class ReturnsPage(object):
     def showListOfReturns(self, Return):
-        data = getItemsByOrderId(Return['orderId'])
+        data = getItemsByReturn(Return)
 
-        self.returns_create_scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1286, len(data)*40))
-        self.returns_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, len(data)*40))
+        self.drawList(data)
+
+        self.returns_create_cause_comboBox.setCurrentText(Return['cause'])
+        self.returns_create_order_lineEdit.setText(str(Return['orderId']))
+        self.returns_create_header.setText('Возврат: ' + str(Return['id']))
+    def drawList(self, data):
+        self.returns_create_scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1286, len(data) * 40))
+        self.returns_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, len(data) * 40))
 
         if len(data) > 0:
             self.returns_create_item.setText("Товар")
@@ -86,24 +94,10 @@ class ReturnsPage(object):
             self.returns_create_item1_name.setText(item['name'])
             self.returns_create_item1_manufac.setText(item['manufacturer'])
             self.returns_create_item1_inorder.setText(str(item['amount']) + ' ' + item['unit'])
-            self.returns_create_cause_comboBox.setCurrentText(Return['cause'])
-            self.returns_create_order_lineEdit.setText(str(Return['orderId']))
-            self.returns_create_header.setText('Возврат: ' + str(Return['id']))
 
-    def clearReturnsCreatePage(self):
-        for child in self.returns_create_scrollAreaWidgetContents.findChildren(QWidget):
-            child.deleteLater()
-    def __init__(self):
-        self.returns = QtWidgets.QWidget()
-        self.returns.setObjectName("returns")
-        self.returns_stackedWidget = QtWidgets.QStackedWidget(self.returns)
-        self.returns_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
-        self.returns_stackedWidget.setObjectName("returns_stackedWidget")
-        self.returns_main = QtWidgets.QWidget()
-        self.returns_main.setObjectName("returns_main")
+            self.returns_create_item1_amount.setValue(item['amountToReturn'])
 
-        # Start of Returns Table
-
+    def drawReturnsTable(self):
         self.returnsData = fetchReturns()
 
         self.returns_main_table = QtWidgets.QTableWidget(self.returns_main)
@@ -147,6 +141,7 @@ class ReturnsPage(object):
             self.returns_main_table.setItem(row, 3, cell)
 
         self.returnsCurrentRow = None
+
         # Выделение всей строки при клике
         def on_item_click(item):
             row = item.row()
@@ -159,6 +154,32 @@ class ReturnsPage(object):
 
         #
         self.returns_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        item = self.returns_main_table.horizontalHeaderItem(0)
+        item.setText("Код возврата")
+        item = self.returns_main_table.horizontalHeaderItem(1)
+        item.setText("Код заказа")
+        item = self.returns_main_table.horizontalHeaderItem(2)
+        item.setText("Причина")
+        item = self.returns_main_table.horizontalHeaderItem(3)
+        item.setText("Дата и время")
+
+    def clearReturnsCreatePage(self):
+        for child in self.returns_create_scrollAreaWidgetContents.findChildren(QWidget):
+            child.deleteLater()
+    def __init__(self):
+        self.returns_create_item1 = None
+        self.returns = QtWidgets.QWidget()
+        self.returns.setObjectName("returns")
+        self.returns_stackedWidget = QtWidgets.QStackedWidget(self.returns)
+        self.returns_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
+        self.returns_stackedWidget.setObjectName("returns_stackedWidget")
+        self.returns_main = QtWidgets.QWidget()
+        self.returns_main.setObjectName("returns_main")
+
+        # Start of Returns Table
+
+        self.drawReturnsTable()
 
         # End of Returns Table
 
@@ -227,7 +248,7 @@ class ReturnsPage(object):
                                                          "border-color: rgb(66, 66, 66);\n"
                                                          "border-radius: 8px;")
         self.returns_create_cause_comboBox.setObjectName("returns_create_cause_comboBox")
-        self.returns_create_cause_comboBox.addItem("Не выбрано")
+        self.returns_create_cause_comboBox.addItem("Не выбрана")
         self.returns_create_cause_comboBox.addItems(fetchCausesToReturn())
         self.returns_create_order_widget = QtWidgets.QWidget(self.returns_create)
         self.returns_create_order_widget.setGeometry(QtCore.QRect(60, 100, 501, 101))
@@ -287,7 +308,7 @@ class ReturnsPage(object):
         self.returns_create_return.setObjectName("returns_create_return")
 
         self.returns_create_saveBtn = QtWidgets.QPushButton(self.returns_create)
-        self.returns_create_saveBtn.setGeometry(QtCore.QRect(1000, 40, 150, 35))
+        self.returns_create_saveBtn.setGeometry(QtCore.QRect(1050, 40, 150, 35))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.returns_create_saveBtn.setFont(font)
@@ -303,17 +324,8 @@ class ReturnsPage(object):
                                                   "}\n"
                                                   "")
         self.returns_create_saveBtn.setObjectName("returns_create_saveBtn")
-        self.returns_create_delete_img = QtWidgets.QLabel(self.returns_create)
-        self.returns_create_delete_img.setGeometry(QtCore.QRect(1320, 40, 35, 35))
-        self.returns_create_delete_img.setStyleSheet("QLabel:hover {\n"
-                                                     "    background-color: rgba(255, 255, 255, 0.5);\n"
-                                                     "    color: rgb(52, 52, 52);\n"
-                                                     "}")
-        self.returns_create_delete_img.setText("")
-        self.returns_create_delete_img.setPixmap(QtGui.QPixmap("assets/delete_button.png"))
-        self.returns_create_delete_img.setObjectName("returns_create_delete_img")
         self.returns_create_closeBtn = QtWidgets.QPushButton(self.returns_create)
-        self.returns_create_closeBtn.setGeometry(QtCore.QRect(1160, 40, 150, 35))
+        self.returns_create_closeBtn.setGeometry(QtCore.QRect(1210, 40, 150, 35))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.returns_create_closeBtn.setFont(font)
@@ -331,26 +343,46 @@ class ReturnsPage(object):
         self.returns_create_closeBtn.setObjectName("returns_create_closeBtn")
         self.returns_stackedWidget.addWidget(self.returns_create)
 
+        completer = QCompleter()
+        word_list = fetchOrders()
+        completer_model = QStandardItemModel()
+        completer.setModel(completer_model)
+        for Return in word_list:
+            list_item = QStandardItem(Return['id'])
+            completer_model.appendRow(list_item)
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        completer.popup().setStyleSheet(
+            "background-color: rgb(91, 91, 91); color: rgb(217, 217, 217); border: 1px solid rgb(66, 66, 66);")
+        self.returns_create_order_lineEdit.setCompleter(completer)
+
+        def getItems():
+            id = self.returns_create_order_lineEdit.text()
+            try:
+                if id == '':
+                    self.returns_stackedWidget.setCurrentIndex(0)
+                    self.clearReturnsCreatePage()
+                    self.drawList([])
+                    self.returns_stackedWidget.setCurrentIndex(1)
+                    return
+                fetchedItems = fetchItemsInOrders(id)
+                if fetchedItems:
+                    self.returns_stackedWidget.setCurrentIndex(0)
+                    self.clearReturnsCreatePage()
+                    self.drawList(fetchedItems)
+                    self.returns_stackedWidget.setCurrentIndex(1)
+
+            except Exception as Ex:
+                print(Ex)
+        getItems()
+        self.returns_create_order_lineEdit.textChanged.connect(getItems)
+
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
 
-        item = self.returns_main_table.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Код возврата"))
-        item = self.returns_main_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Код заказа"))
-        item = self.returns_main_table.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Причина"))
-        item = self.returns_main_table.horizontalHeaderItem(3)
-        item.setText(_translate("MainWindow", "Дата и время"))
         self.returns_main_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
         self.returns_create_header.setText(_translate("MainWindow", "Возрват 123123"))
         self.returns_create_cause_header.setText(_translate("MainWindow", "Причина"))
         self.returns_create_cause_comboBox.setPlaceholderText(_translate("MainWindow", "Выберите"))
-        self.returns_create_cause_comboBox.setItemText(0, _translate("MainWindow", "Нарушена упаковка"))
-        self.returns_create_cause_comboBox.setItemText(1, _translate("MainWindow", "Неполный комплект"))
-        self.returns_create_cause_comboBox.setItemText(2, _translate("MainWindow", "Не тот товар"))
-        self.returns_create_cause_comboBox.setItemText(3, _translate("MainWindow", "Товар поврежден"))
-        self.returns_create_cause_comboBox.setItemText(4, _translate("MainWindow", "Бракованный товар"))
         self.returns_create_order_header.setText(_translate("MainWindow", "Заказ"))
         self.returns_create_order_lineEdit.setPlaceholderText(_translate("MainWindow", "Введите номер заказа"))
         self.returns_create_saveBtn.setText(_translate("MainWindow", "СОХРАНИТЬ"))

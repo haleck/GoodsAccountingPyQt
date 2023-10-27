@@ -241,7 +241,8 @@ def fetchItemsInOrders(id):
                     'price': "",
                     'description': "",
                     'manufacturer': "",
-                    'amount': "?"
+                    'amount': "?",
+                    'amountToReturn': 0
                 }
             )
         else:
@@ -254,7 +255,8 @@ def fetchItemsInOrders(id):
                     'price': item.item.price,
                     'description': item.item.description,
                     'manufacturer': Manufacturers.get(Manufacturers.id == item.item.manufacturer).name,
-                    'amount': item.amount
+                    'amount': item.amount,
+                    "amountToReturn": 0
                 }
             )
     return items
@@ -268,27 +270,90 @@ def createOrder(address="", status="", items=[]):
             order=order.id,
             amount=item['amount'],
         )
+        itemInDb = Items.get(Items.id == item['id'])
+        itemInDb.amount = itemInDb.amount - item['amount']
+        itemInDb.save()
     return 0
 
 
 def fetchReturns():
-    return [
-        {'id': 1, 'orderId': 1, 'cause': 'Нарушена упаковка', 'date': '12.04.2023'},
-        {'id': 2, 'orderId': 2, 'cause': 'Бракованный товар', 'date': '15.04.2023'},
-        {'id': 3, 'orderId': 3, 'cause': 'Не полный комплект', 'date': '22.04.2023'},
-        {'id': 4, 'orderId': 4, 'cause': 'Нарушена упаковка', 'date': '27.04.2023'},
-        {'id': 5, 'orderId': 5, 'cause': 'Не полный комплект', 'date': '02.05.2023'},
-    ]
+    returns = []
+    for Return in Returns.select():
+        returns.append({
+            'id': Return.id,
+            "orderId": Return.order,
+            "cause": Return.cause.cause,
+            "date": Return.dateAndTime
+        })
+    return returns
 
 
-def getItemsByOrderId(id: str):
-    order = filter(lambda x: x['id'] == id, fetchOrders())
-    order = list(order)[0]
-    return order['items']
+def createReturn(order, cause, items):
+    Return = Returns.create(
+        dateAndTime=datetime.now(),
+        cause=CausesToReturn.get(CausesToReturn.cause == cause),
+        order=order,
+    )
+    for item in items:
+        ItemsInReturns.create(
+            item=item['id'],
+            return1=Return,
+            amount=item['amount']
+        )
+        itemInBD = Items.get(Items.id == item['id'])
+        itemInBD.amount = itemInBD.amount + item['amount']
+        itemInBD.save()
+    return 0
+
+
+# def getItemsByReturn(returnsData):
+#     order_id = returnsData['orderId']
+#     items = ItemsInOrders.select().where(ItemsInOrders.order == order_id)
+#     itemsInOrders = []
+#     for item in items:
+#         itemsInOrders.append(
+#             {
+#                 "name": item.item.name,
+#                 "manufacturer": item.item.manufacturer.name,
+#                 "unit": item.item.unit.name,
+#                 "amount": item.amount,
+#                 "amountToReturn": 0
+#             }
+#         )
+#     return itemsInOrders
+
+
+def getItemsByReturn(returnsData):
+    order_id = returnsData['orderId']
+    items = ItemsInOrders.select().where(ItemsInOrders.order == order_id)
+    itemsToReturn = ItemsInReturns.select().where(ItemsInReturns.return1 == returnsData['id'])
+    itemsInOrders = []
+    for item in items:
+        amountToReturn = list(filter(lambda x: x.item == item.item, itemsToReturn))
+        if len(amountToReturn) == 0:
+            amountToReturn = 0
+        else:
+            amountToReturn = amountToReturn[0].amount
+        itemsInOrders.append(
+            {
+                "name": item.item.name,
+                "manufacturer": item.item.manufacturer.name,
+                "unit": item.item.unit.name,
+                "amount": item.amount,
+                "amountToReturn": amountToReturn
+            }
+        )
+    return itemsInOrders
 
 
 def deleteOrder(id):
-    Orders.delete_instance(Orders.get(Orders.id == id))
+    order = Orders.get(Orders.id == id)
+    items = ItemsInOrders.select().where(ItemsInOrders.order == id)
+    for item in items:
+        itemInBD = Items.get(Items.id == item.item)
+        itemInBD.amount = itemInBD.amount + item.amount
+        itemInBD.save()
+    Orders.delete_instance(order)
     return 0
 
 
