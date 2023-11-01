@@ -370,37 +370,45 @@ def updateOrder(id, address="", status="", items=[]):
 
 
 def fetchGetStocks():
-    # writeOffs = []
-    # for writeOff in WriteOffs.select():
-    #     writeOffs.append(
-    #         {
-    #             'id': writeOff.id,
-    #             'date': writeOff.dateAndTime,
-    #             'itemName': writeOff.item.name,
-    #             'amount': str(writeOff.amount),
-    #             'cause': writeOff.cause.cause,
-    #             'manufacturer': writeOff.item.manufacturer.name
-    #         }
-    #     )
-    # return writeOffs
-    return [
-        {'id': 1, 'date': '23.06.2023', 'time': '20:10', 'items': [
-            {'description': 'Описание товара 4', 'manufacturer': 'Производитель 2', 'amount': 3}
-        ]}
-    ]
-    # getStocks = []
-    # for getStock in GetStocks.select():
-    #     [date, time] = getStock.dateAndTime.split(' ')
-    #     getStocks.append(
-    #         {
-    #             'id': getStock.id,
-    #             'date': date,
-    #             'time': time,
-    #             'items': [
-    #
-    #             ]
-    #         }
-    #     )
+    getStocks = []
+    for getStock in GetStocks.select():
+        [date, time] = getStock.dateAndTime.split(' ')
+        getStocks.append(
+            {
+                'id': getStock.id,
+                'date': date,
+                'time': time,
+                'items': [
+                    {
+                        'name': itemInGetStock.item.name,
+                        'description': itemInGetStock.item.description,
+                        'manufacturer': itemInGetStock.item.manufacturer.name,
+                        'amount': itemInGetStock.amount,
+                        'goodQuality': itemInGetStock.goodQualityAmount
+                    } for itemInGetStock in ItemsInGetStocks.select().where(ItemsInGetStocks.getStock == getStock.id)
+                ]
+            }
+        )
+    return getStocks
+
+
+def createGetStock(items):
+    getStock = GetStocks.create(
+        dateAndTime=datetime.now()
+    )
+    for item in items:
+        itemInDB = Items.get(Items.name == item['name'])
+        itemInDB.amount = itemInDB.amount + item['goodQuality']
+        itemInDB.save()
+
+        ItemsInGetStocks.create(
+            amount=item['amount'],
+            goodQualityAmount=item['goodQuality'],
+            item=itemInDB,
+            getStock=getStock
+        )
+
+    return 0
 
 
 def fetchWriteOffs():

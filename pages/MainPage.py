@@ -1,7 +1,7 @@
 import peewee
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QObject, QByteArray
-from PyQt5.QtWidgets import QTableWidgetItem, QWidget, QLabel, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QTableWidgetItem, QWidget, QLabel, QPushButton, QVBoxLayout, QDialog, QHBoxLayout
 from reportlab.lib.pagesizes import landscape, letter, legal
 from reportlab.platypus import Image
 
@@ -18,6 +18,68 @@ from PyQt5.QtGui import QImage, QPixmap
 
 
 class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage):
+    def showPopUpConfirmation(self, text):
+        dialog = QDialog()
+        dialog.setWindowTitle("Уведомление")
+
+        dialog.setStyleSheet("background-color: rgb(77, 77, 77);")
+
+        label = QLabel(text)
+        label.setStyleSheet("color: rgb(255, 255, 255);")
+        label.setAlignment(Qt.AlignCenter)
+
+        # Создаем горизонтальный контейнер для кнопок
+        button_layout = QHBoxLayout()
+
+        ok_button = QPushButton("OK")
+        ok_button.setStyleSheet("QPushButton {\n"
+                                "    background-color:rgb(52, 52, 52);\n"
+                                "    border-color: rgb(66, 66, 66);\n"
+                                "    color: rgb(255, 255, 255);\n"
+                                "    border-radius: 8px;    \n"
+                                "    height: 30px; margin-top: 10px;"
+                                "}\n"
+                                "QPushButton:hover {\n"
+                                "    background-color: rgba(255, 255, 255, 0.3);\n"
+                                "    color: rgb(52, 52, 52);\n"
+                                "}")
+
+        cancel_button = QPushButton("Отмена")
+        cancel_button.setStyleSheet("QPushButton {\n"
+                                    "    background-color:rgb(52, 52, 52);\n"
+                                    "    border-color: rgb(66, 66, 66);\n"
+                                    "    color: rgb(255, 255, 255);\n"
+                                    "    border-radius: 8px;    \n"
+                                    "    height: 30px; margin-top: 10px;"
+                                    "}\n"
+                                    "QPushButton:hover {\n"
+                                    "    background-color: rgba(255, 255, 255, 0.3);\n"
+                                    "    color: rgb(52, 52, 52);\n"
+                                    "}")
+
+        # Добавляем кнопки в горизонтальный контейнер
+        button_layout.addWidget(cancel_button)
+        button_layout.addWidget(ok_button)
+
+        # Создаем вертикальный контейнер для всего содержимого
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+
+        # Добавляем горизонтальный контейнер с кнопками
+        layout.addLayout(button_layout)
+
+        dialog.setLayout(layout)
+
+        # Подключаем обработчики к кнопкам
+        ok_button.clicked.connect(dialog.accept)
+        cancel_button.clicked.connect(dialog.reject)
+
+        result = dialog.exec_()
+        if result == QDialog.Accepted:
+            return True
+        elif result == QDialog.Rejected:
+            return False
+
     def drawEmployeesTable(self):
         self.employeesData = fetchEmployees()
 
@@ -940,7 +1002,6 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         #   GetStocks
         self.getStocks_main_createBtn.mousePressEvent = self.setGetStocksCreatePage
         self.getStocks_create_backBtn.mousePressEvent = self.setGetStocksMainPage
-        self.getStocks_create_delete.mousePressEvent = self.setGetStocksMainPage
         self.getStocks_create_close.clicked.connect(self.getStocksCreateClose)
         self.getStocks_create_save.clicked.connect(self.getStocksCreateSave)
         self.getStocks_main_table.itemDoubleClicked.connect(self.setUpGetStocksCreatePage)
@@ -1018,17 +1079,18 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.items_stackedWidget.setCurrentIndex(0)
 
     def itemsCreateDelete(self, event):
-        item_id = self.itemsData[self.itemsCurrentRow]['id']
-        try:
-            result = deleteItem(item_id)
-            if result is None:
-                createNewLog('Удаление товара', self.currentUser)
-                self.drawItemsTable()
-                self.drawStockTable()
-                self.drawWatchTable()
-        except Exception as Ex:
-            print(Ex)
-        self.items_stackedWidget.setCurrentIndex(0)
+        if self.showPopUpConfirmation("Вы уверены в том, что хотите удалить товар?"):
+            item_id = self.itemsData[self.itemsCurrentRow]['id']
+            try:
+                result = deleteItem(item_id)
+                if result is None:
+                    createNewLog('Удаление товара', self.currentUser)
+                    self.drawItemsTable()
+                    self.drawStockTable()
+                    self.drawWatchTable()
+            except Exception as Ex:
+                print(Ex)
+            self.items_stackedWidget.setCurrentIndex(0)
 
     def setUpItemsCreatePage(self):
         row = self.itemsData[self.itemsCurrentRow]
@@ -1126,15 +1188,16 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.orders_stackedWidget.setCurrentIndex(0)
 
     def ordersCreateDelete(self, event):
-        result = deleteOrder(self.ordersData[self.ordersCurrentRow]['id'])
-        if result == 0:
-            createNewLog('Удаление заказа', self.currentUser)
-            self.drawOrdersTable()
-            self.drawReturnsTable()
-            self.drawWatchTable()
-            self.drawStockTable()
-        self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
-        self.orders_stackedWidget.setCurrentIndex(0)
+        if self.showPopUpConfirmation('Вы уверены в том, что хотите удалить заказ?'):
+            result = deleteOrder(self.ordersData[self.ordersCurrentRow]['id'])
+            if result == 0:
+                createNewLog('Удаление заказа', self.currentUser)
+                self.drawOrdersTable()
+                self.drawReturnsTable()
+                self.drawWatchTable()
+                self.drawStockTable()
+            self.orders_main_table.itemDoubleClicked.connect(self.setUpOrdersCreatePage)
+            self.orders_stackedWidget.setCurrentIndex(0)
 
     def handleChangeOrderItem(self):
         checkbox_checked = False
@@ -1317,7 +1380,7 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
     def setGetStocksCreatePage(self, event):
         self.getStocksCurrentRow = None
         self.clearGetStocksInCreationPage()
-        self.showListOfGetStocks([])
+        self.showListOfGetStocks([], deleteOption=True)
         self.showItemCreationInGetStocksPage()
         self.getStocks_create_header.setText('Новое оприходвание')
         self.getStocks_stackedWidget.setCurrentIndex(1)
@@ -1329,12 +1392,17 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.getStocks_stackedWidget.setCurrentIndex(0)
 
     def getStocksCreateSave(self):
+        result = createGetStock(items=self.newItems)
+        if result == 0:
+            createNewLog("Создание оприходования", self.currentUser)
+        self.drawStockTable()
+        self.drawWatchTable()
+        self.drawGetStocksTable()
         self.getStocks_stackedWidget.setCurrentIndex(0)
 
     def setUpGetStocksCreatePage(self):
         self.clearGetStocksInCreationPage()
         self.showListOfGetStocks(self.getStocksData[self.getStocksCurrentRow]['items'])
-        self.showItemCreationInGetStocksPage()
         self.getStocks_create_header.setText('Оприходование ' + str(self.getStocksData[self.getStocksCurrentRow]['id']))
         self.getStocks_stackedWidget.setCurrentIndex(1)
 
@@ -1354,18 +1422,19 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.writeOffs_stackedWidget.setCurrentIndex(0)
 
     def writeOffsCreateDelete(self, event):
-        writeOff_id = self.writeOffsData[self.writeOffsCurrentRow]['id']
-        try:
-            result = deleteWriteOff(writeOff_id)
-            if result == 1:
-                createNewLog('Удаление списания', self.currentUser)
-                self.drawWriteOffsTable()
-                self.drawWatchTable()
-                self.drawStockTable()
-        except Exception as Ex:
-            print('here')
-            print(Ex)
-        self.writeOffs_stackedWidget.setCurrentIndex(0)
+        if self.showPopUpConfirmation("Вы уверены в том, что хотите удалить списание?"):
+            writeOff_id = self.writeOffsData[self.writeOffsCurrentRow]['id']
+            try:
+                result = deleteWriteOff(writeOff_id)
+                if result == 1:
+                    createNewLog('Удаление списания', self.currentUser)
+                    self.drawWriteOffsTable()
+                    self.drawWatchTable()
+                    self.drawStockTable()
+            except Exception as Ex:
+                print('here')
+                print(Ex)
+            self.writeOffs_stackedWidget.setCurrentIndex(0)
 
     def writeOffsCreateSave(self, event):
         try:
@@ -1434,11 +1503,12 @@ class MainPage(StockPage, OrdersPage, ReturnsPage, GetStocksPage, WriteOffsPage)
         self.employees_stackedWidget.setCurrentIndex(0)
 
     def employeesCreateDelete(self, event):
-        if deleteEmployee(self.employeesData[self.employeesCurrentRow]['id']) == 1:
-            createNewLog("Удаление сотрудника", self.currentUser)
-            self.drawEmployeesTable()
-            self.drawWatchTable()
-        self.employees_stackedWidget.setCurrentIndex(0)
+        if self.showPopUpConfirmation("Вы уверены в том, что хотите удалить сотрудника?"):
+            if deleteEmployee(self.employeesData[self.employeesCurrentRow]['id']) == 1:
+                createNewLog("Удаление сотрудника", self.currentUser)
+                self.drawEmployeesTable()
+                self.drawWatchTable()
+            self.employees_stackedWidget.setCurrentIndex(0)
 
     def employeesCreateSave(self, event):
         try:

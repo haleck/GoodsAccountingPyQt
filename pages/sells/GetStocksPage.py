@@ -6,7 +6,14 @@ from PyQt5.QtWidgets import QTableWidgetItem, QWidget
 from utils import *
 
 class GetStocksPage(object):
-    def showListOfGetStocks(self, data):
+    def deleteItemFromList(self, name):
+        self.getStocks_stackedWidget.setCurrentIndex(0)
+        self.clearGetStocksInCreationPage()
+        self.newItems = list(filter(lambda x: x['name'] != name,self.newItems))
+        self.showListOfGetStocks(self.newItems, deleteOption=True)
+        self.showItemCreationInGetStocksPage()
+        self.getStocks_stackedWidget.setCurrentIndex(1)
+    def showListOfGetStocks(self, data, deleteOption=False):
         self.getStocks_create_scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1284, len(data)*42+5))
         self.getStocks_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, len(data)*42+5))
         for i, item in enumerate(data):
@@ -68,15 +75,22 @@ class GetStocksPage(object):
             self.getStocks_create_item1_delete.setPixmap(QtGui.QPixmap("assets/X.png"))
             self.getStocks_create_item1_delete.setObjectName("getStocks_create_item1_delete")
 
+            if deleteOption:
+                self.getStocks_create_item1_delete.mousePressEvent = lambda x: self.deleteItemFromList(self.getStocks_create_item1_name.text())
+
+            if not deleteOption:
+                self.getStocks_create_item1_amount.setEnabled(False)
+                self.getStocks_create_item1_nadlejc.setEnabled(False)
+
+            self.getStocks_create_item1_amount.setValue(item['amount'])
+            self.getStocks_create_item1_nadlejc.setValue(item['goodQuality'])
+
             self.getStocks_create_item1_name.setText(item['name'])
             self.getStocks_create_item1manufac.setText(item['manufacturer'])
 
     def showItemCreationInGetStocksPage(self):
         self.getStocks_create_new = QtWidgets.QWidget(self.getStocks_create_scrollAreaWidgetContents)
-        if self.getStocksCurrentRow is not None:
-            self.getStocks_create_new.setGeometry(QtCore.QRect(0, 10+len(self.getStocksData[self.getStocksCurrentRow]['items'])*40, 1300, 35))
-        else:
-            self.getStocks_create_new.setGeometry(QtCore.QRect(0, 10, 1300, 35))
+        self.getStocks_create_new.setGeometry(QtCore.QRect(0, len(self.newItems)*40, 1300, 35))
         self.getStocks_create_new.setMinimumSize(QtCore.QSize(0, 0))
         self.getStocks_create_new.setObjectName("getStocks_create_new")
         self.getStocks_create_new_name = QtWidgets.QLineEdit(self.getStocks_create_new)
@@ -132,20 +146,13 @@ class GetStocksPage(object):
 
         addItemCompleters(self.getStocks_create_new_name)
 
+        self.getStocks_create_new_ok.clicked.connect(self.redrawList)
+
     def clearGetStocksInCreationPage(self):
         for child in self.getStocks_create_scrollAreaWidgetContents.findChildren(QWidget):
             child.deleteLater()
-    def __init__(self):
-        self.getStocks = QtWidgets.QWidget()
-        self.getStocks.setObjectName("getStocks")
-        self.getStocks_stackedWidget = QtWidgets.QStackedWidget(self.getStocks)
-        self.getStocks_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
-        self.getStocks_stackedWidget.setObjectName("getStocks_stackedWidget")
-        self.getStocks_main = QtWidgets.QWidget()
-        self.getStocks_main.setObjectName("getStocks_main")
 
-        # Start of GetStocks Table
-
+    def drawGetStocksTable(self):
         self.getStocksData = fetchGetStocks()
 
         self.getStocks_main_table = QtWidgets.QTableWidget(self.getStocks_main)
@@ -183,6 +190,7 @@ class GetStocksPage(object):
 
         # Выделение всей строки при клике
         self.getStocksCurrentRow = None
+
         def on_item_click(item):
             row = item.row()
             self.getStocksCurrentRow = row
@@ -194,6 +202,25 @@ class GetStocksPage(object):
 
         #
         self.getStocks_main_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        item = self.getStocks_main_table.horizontalHeaderItem(0)
+        item.setText("Код оприходования")
+        item = self.getStocks_main_table.horizontalHeaderItem(1)
+        item.setText("Дата")
+        item = self.getStocks_main_table.horizontalHeaderItem(2)
+        item.setText("Время")
+    def __init__(self):
+        self.getStocks = QtWidgets.QWidget()
+        self.getStocks.setObjectName("getStocks")
+        self.getStocks_stackedWidget = QtWidgets.QStackedWidget(self.getStocks)
+        self.getStocks_stackedWidget.setGeometry(QtCore.QRect(10, 0, 1421, 891))
+        self.getStocks_stackedWidget.setObjectName("getStocks_stackedWidget")
+        self.getStocks_main = QtWidgets.QWidget()
+        self.getStocks_main.setObjectName("getStocks_main")
+
+        # Start of GetStocks Table
+
+        self.drawGetStocksTable()
 
         # End of GetStocks Table
 
@@ -253,13 +280,13 @@ class GetStocksPage(object):
         self.getStocks_create_scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, 100))
         self.getStocks_create_scrollAreaWidgetContents.setObjectName("getStocks_create_scrollAreaWidgetContents")
 
-        # HEre was a list of children
+        # HEre wa   s a list of children
 
         # Here was new item creation
 
         self.getStocks_create_scrollArea.setWidget(self.getStocks_create_scrollAreaWidgetContents)
         self.getStocks_create_save = QtWidgets.QPushButton(self.getStocks_create)
-        self.getStocks_create_save.setGeometry(QtCore.QRect(1000, 40, 150, 35))
+        self.getStocks_create_save.setGeometry(QtCore.QRect(1030, 40, 150, 35))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.getStocks_create_save.setFont(font)
@@ -275,17 +302,8 @@ class GetStocksPage(object):
                                                  "}\n"
                                                  "")
         self.getStocks_create_save.setObjectName("getStocks_create_save")
-        self.getStocks_create_delete = QtWidgets.QLabel(self.getStocks_create)
-        self.getStocks_create_delete.setGeometry(QtCore.QRect(1320, 40, 35, 35))
-        self.getStocks_create_delete.setStyleSheet("QLabel:hover {\n"
-                                                   "    background-color: rgba(255, 255, 255, 0.5);\n"
-                                                   "    color: rgb(52, 52, 52);\n"
-                                                   "}")
-        self.getStocks_create_delete.setText("")
-        self.getStocks_create_delete.setPixmap(QtGui.QPixmap("assets/delete_button.png"))
-        self.getStocks_create_delete.setObjectName("getStocks_create_delete")
         self.getStocks_create_close = QtWidgets.QPushButton(self.getStocks_create)
-        self.getStocks_create_close.setGeometry(QtCore.QRect(1160, 40, 150, 35))
+        self.getStocks_create_close.setGeometry(QtCore.QRect(1190, 40, 150, 35))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.getStocks_create_close.setFont(font)
@@ -317,15 +335,41 @@ class GetStocksPage(object):
         self.getStocks_create_manufac.setObjectName("getStocks_create_manufac")
         self.getStocks_stackedWidget.addWidget(self.getStocks_create)
 
+        self.newItems = []
+
+    def redrawList(self):
+        for item in self.newItems:
+            if item['name'] == self.getStocks_create_new_name.text():
+                self.showPopUp('Такой товар уже есть в оприходовании')
+                return
+
+        manufacturer = Items.select().where(Items.name == self.getStocks_create_new_name.text())
+
+        if not manufacturer:
+            self.showPopUp('Такого товара не существует')
+            return
+
+        manufacturer = manufacturer[0]
+
+        self.getStocks_stackedWidget.setCurrentIndex(0)
+        self.clearGetStocksInCreationPage()
+
+        self.newItems.append(
+            {
+                'name': self.getStocks_create_new_name.text(),
+                'manufacturer': manufacturer.manufacturer.name,
+                'amount': self.getStocks_create_new_in.value(),
+                'goodQuality': self.getStocks_create_new_nadlejc.value()
+            }
+        )
+
+        self.showListOfGetStocks(self.newItems, deleteOption=True)
+        self.showItemCreationInGetStocksPage()
+
+        self.getStocks_stackedWidget.setCurrentIndex(1)
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
 
-        item = self.getStocks_main_table.horizontalHeaderItem(0)
-        item.setText(_translate("MainWindow", "Код оприходования"))
-        item = self.getStocks_main_table.horizontalHeaderItem(1)
-        item.setText(_translate("MainWindow", "Дата"))
-        item = self.getStocks_main_table.horizontalHeaderItem(2)
-        item.setText(_translate("MainWindow", "Время"))
         self.getStocks_main_search_lineEdit.setPlaceholderText(_translate("MainWindow", "Найти..."))
         self.getStocks_create_header.setText(_translate("MainWindow", "Оприходование 123123"))
         self.getStocks_create_save.setText(_translate("MainWindow", "СОХРАНИТЬ"))
