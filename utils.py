@@ -5,8 +5,9 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QCompleter
 
 from Tables import *
+from constants import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT
 
-db = PostgresqlDatabase('dbb', user='zdiroog', password='password', host='localhost', port=5432)
+db = PostgresqlDatabase(DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
 
 db.connect()
 db.create_tables([Statuses, Orders, Returns, ItemsInOrders, Items, Categories, Units,

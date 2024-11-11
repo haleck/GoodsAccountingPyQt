@@ -1,0 +1,4 @@
+pyqt5==5.15.11
+peewee==3.17.7
+reportlab==4.2.5
+psycopg2-binary==2.9.10
