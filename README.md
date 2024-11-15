@@ -43,13 +43,13 @@
 
 При регистрации первого пользователя он будет считаться администратором и в дальнейшем сможет добавлять в систему работников.
 
-<img src="system%20actions/auth.png" alt="Авторизация в системе" width="600" height="400">
+<img src="system%20actions/auth.png" alt="Авторизация в системе">
 
 
-<img src="system%20actions/reg.png" alt="Регистрация в системе" width="600" height="400">
+<img src="system%20actions/reg.png" alt="Регистрация в системе">
 
 
-<img src="system%20actions/login.png" alt="Вход в систему" width="600" height="400">
+<img src="system%20actions/login.png" alt="Вход в систему">
 
 ## Работа с товарами
 
@@ -59,11 +59,11 @@
 
 Всем пользователям доступна возможность просматривать текущие остатки по товарам и проведение инвентаризации.
 
-<img src="system%20actions/goods%20creation.png" alt="Создание товара" width="600" height="400">
+<img src="system%20actions/goods%20creation.png" alt="Создание товара">
 
-<img src="system%20actions/goods%20searching.png" alt="Поиск по товарам" width="600" height="400">
+<img src="system%20actions/goods%20searching.png" alt="Поиск по товарам">
 
-<img src="system%20actions/remaining%20goods.png" alt="Отслеживание остатков в системе" width="600" height="400">
+<img src="system%20actions/remaining%20goods.png" alt="Отслеживание остатков в системе">
 
 Для изменения количества товаров предусмотрены такие процедуры как:
 - Инвентаризация
@@ -72,15 +72,15 @@
 - Оприходования
 - Списания
 
-<img src="system%20actions/stocktaking.png" alt="Инвентаризация" width="600" height="400">
-<img src="system%20actions/order%20creation.png" alt="Оформление заказа" width="600" height="400">
-<img src="system%20actions/return.png" alt="Возврат товара" width="600" height="400">
+<img src="system%20actions/stocktaking.png" alt="Инвентаризация">
+<img src="system%20actions/order%20creation.png" alt="Оформление заказа">
+<img src="system%20actions/return.png" alt="Возврат товара">
 
 ## Отслеживание изменений в системе
 
 Если в системе авторизован администратор - во вкладке "Отслеживание" будет отображаться информация обо всех изменениях в БД.
 
-<img src="system%20actions/log.png" alt="Отслеживание изменений в системе" width="600" height="400">
+<img src="system%20actions/log.png" alt="Отслеживание изменений в системе">
 
 ## Добавление сотрудников
 
@@ -88,4 +88,4 @@
 
 При этом только гл. администратор системы (первый зарегистрированный в системе пользователь) может добавлять и удалять других администраторов.
 
-<img src="system%20actions/add%20user.png" alt="Добавление сотрудников" width="600" height="400">
+<img src="system%20actions/add%20user.png" alt="Добавление сотрудников">
